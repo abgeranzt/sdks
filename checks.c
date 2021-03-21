@@ -5,9 +5,9 @@ int sdk_checkrow(struct sdk *s, int row, int col)
 {
 	int av, n, i;
 	av = 0;
-	for (n = 0; n < 9; n++) {
+	for (n = 0; n < SDK_W; n++) {
 		/* Number already marked as available. */
-		for (i = 0; i < 9; i++) {
+		for (i = 0; i < SDK_W; i++) {
 			if (i == col)
 				continue;
 			/* Number exists. */
@@ -29,8 +29,8 @@ int sdk_checkcol(struct sdk *s, int row, int col)
 {
 	int av, n, i;
 	av = 0;
-	for (n = 0; n < 9; n++) {
-		for (i = 0; i < 9; i++) {
+	for (n = 0; n < SDK_W; n++) {
+		for (i = 0; i < SDK_W; i++) {
 			if (i == row)
 				continue;
 			if (s->rows[i][col].number == n + 1)
@@ -52,7 +52,7 @@ int sdk_checkgrp(struct sdk *s, int row, int col)
 	for (gcol = col; gcol % 3; gcol--);
 	int av, n, i, j;
 	av = 0;
-	for (n = 0; n < 9; n++) {
+	for (n = 0; n < SDK_W; n++) {
 		for (i = grow; i < grow + 3; i++) {
 			for (j = gcol; j < gcol + 3; j++) {
 				if (i == row && j == col)
