@@ -19,10 +19,16 @@ struct cell {
 };
 
 struct sdk {
-	struct cell rows[9][9];
-	struct cell (*group)[3][3];
+	struct cell cells[SDK_SQ];
+	struct cell *rows[SDK_W];
 };
 
 
 /* io.c */
-void parsesdk(struct sdk *s);
+void sdk_parsein(struct sdk *s);
+
+/* sdks.c */
+struct sdk *sdk_init(void);
+int sdk_checkrow(struct sdk *s, int avail, int row, int col);
+int sdk_checkcol(struct sdk *s, int avail, int row, int col);
+int sdk_checkgrp(struct sdk *s, int avail, int row, int col);
