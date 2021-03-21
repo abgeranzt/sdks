@@ -13,9 +13,16 @@ enum numbers {
 	NINE = 256
 };
 
-struct sdk {
-	int rows[9][9];
-	int (*groups)[3][9];
+struct cell {
+	int number;
+	int avail;
 };
 
-int parsesdk(struct sdk *s);
+struct sdk {
+	struct cell rows[9][9];
+	struct cell (*group)[3][3];
+};
+
+
+/* io.c */
+void parsesdk(struct sdk *s);
