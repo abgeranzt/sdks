@@ -11,25 +11,25 @@ struct sdk *sdk_init(void)
 	return s;
 }
 
-struct sdk *sdk_index(struct sdk *s)
+/* Iterate through every cell and check available numbers */
+void sdk_index(struct sdk *s)
 {
-	int avail, i, j;
+	int av, i, j;
 	for (i = 0; i < SDK_W; i++) {
 		for (j = 0; j < SDK_W; j++) {
-			avail = sdk_checkrow(s, i, j);
-			avail &= sdk_checkcol(s, i, j);
-			avail &= sdk_checkgrp(s, i, j);
-			s->rows[i][j].avail = avail;
+			av = sdk_checkrow(s, i, j);
+			av &= sdk_checkcol(s, i, j);
+			av &= sdk_checkgrp(s, i, j);
+			s->rows[i][j].avail = av;
 		}
 	}
-	return s;
 }
 
-/* Check row for available numbers and return them in avail */
+/* Check row for available numbers and return them in av */
 int sdk_checkrow(struct sdk *s, int row, int col)
 {
-	int avail, n, i;
-	avail = 0;
+	int av, n, i;
+	av = 0;
 	for (n = 0; n < 9; n++) {
 		/* Number already marked as available. */
 		for (i = 0; i < 9; i++) {
@@ -40,20 +40,20 @@ int sdk_checkrow(struct sdk *s, int row, int col)
 				goto nloop;
 			}
 		}
-		avail |= 1 << n;
+		av |= 1 << n;
 		nloop:
 		continue;
 	}
-	return avail;
+	return av;
 }
 
-/* Check column for available numbers and return them in avail.
+/* Check column for available numbers and return them in av.
  * Logically equivalent to checkrow().
  */
 int sdk_checkcol(struct sdk *s, int row, int col)
 {
-	int avail, n, i;
-	avail = 0;
+	int av, n, i;
+	av = 0;
 	for (n = 0; n < 9; n++) {
 		for (i = 0; i < 9; i++) {
 			if (i == row)
@@ -61,22 +61,22 @@ int sdk_checkcol(struct sdk *s, int row, int col)
 			if (s->rows[i][col].number == n + 1)
 				goto nloop;
 		}
-		avail |= 1 << n;
+		av |= 1 << n;
 		nloop:
 		continue;
 	}
-	return avail;
+	return av;
 }
 
-/* Check group of 3x3 cells for available numbers and return them in avail. */
+/* Check group of 3x3 cells for available numbers and return them in av. */
 int sdk_checkgrp(struct sdk *s, int row, int col)
 {
 	int grow, gcol;
 	/* Specify group boundaries. */
 	for (grow = row; grow % 3; grow--);
 	for (gcol = col; gcol % 3; gcol--);
-	int avail, n, i, j;
-	avail = 0;
+	int av, n, i, j;
+	av = 0;
 	for (n = 0; n < 9; n++) {
 		for (i = grow; i < grow + 3; i++) {
 			for (j = gcol; j < gcol + 3; j++) {
@@ -86,10 +86,10 @@ int sdk_checkgrp(struct sdk *s, int row, int col)
 					goto nloop;
 			}
 		}
-		avail |= 1 << n;
+		av |= 1 << n;
 		nloop:
 		continue;
 	}
-	return avail;
+	return av;
 }
 
