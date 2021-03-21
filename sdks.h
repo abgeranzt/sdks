@@ -29,6 +29,7 @@ void sdk_parsein(struct sdk *s);
 
 /* sdks.c */
 struct sdk *sdk_init(void);
-int sdk_checkrow(struct sdk *s, int avail, int row, int col);
-int sdk_checkcol(struct sdk *s, int avail, int row, int col);
-int sdk_checkgrp(struct sdk *s, int avail, int row, int col);
+struct sdk *sdk_index(struct sdk *s);
+int sdk_checkrow(struct sdk *s, int row, int col);
+int sdk_checkcol(struct sdk *s, int row, int col);
+int sdk_checkgrp(struct sdk *s, int row, int col);

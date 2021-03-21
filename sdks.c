@@ -11,14 +11,27 @@ struct sdk *sdk_init(void)
 	return s;
 }
 
-/* Check row for available numbers and return them in avail */
-int sdk_checkrow(struct sdk *s, int avail, int row, int col)
+struct sdk *sdk_index(struct sdk *s)
 {
-	int n, i;
+	int avail, i, j;
+	for (i = 0; i < SDK_W; i++) {
+		for (j = 0; j < SDK_W; j++) {
+			avail = sdk_checkrow(s, i, j);
+			avail &= sdk_checkcol(s, i, j);
+			avail &= sdk_checkgrp(s, i, j);
+			s->rows[i][j].avail = avail;
+		}
+	}
+	return s;
+}
+
+/* Check row for available numbers and return them in avail */
+int sdk_checkrow(struct sdk *s, int row, int col)
+{
+	int avail, n, i;
+	avail = 0;
 	for (n = 0; n < 9; n++) {
 		/* Number already marked as available. */
-		if (avail & 1 << n)
-			continue;
 		for (i = 0; i < 9; i++) {
 			if (i == col)
 				continue;
@@ -37,12 +50,11 @@ int sdk_checkrow(struct sdk *s, int avail, int row, int col)
 /* Check column for available numbers and return them in avail.
  * Logically equivalent to checkrow().
  */
-int sdk_checkcol(struct sdk *s, int avail, int row, int col)
+int sdk_checkcol(struct sdk *s, int row, int col)
 {
-	int n, i;
+	int avail, n, i;
+	avail = 0;
 	for (n = 0; n < 9; n++) {
-		if (avail & 1 << n)
-			continue;
 		for (i = 0; i < 9; i++) {
 			if (i == row)
 				continue;
@@ -57,16 +69,15 @@ int sdk_checkcol(struct sdk *s, int avail, int row, int col)
 }
 
 /* Check group of 3x3 cells for available numbers and return them in avail. */
-int sdk_checkgrp(struct sdk *s, int avail, int row, int col)
+int sdk_checkgrp(struct sdk *s, int row, int col)
 {
 	int grow, gcol;
 	/* Specify group boundaries. */
 	for (grow = row; grow % 3; grow--);
 	for (gcol = col; gcol % 3; gcol--);
-	int n, i, j;
+	int avail, n, i, j;
+	avail = 0;
 	for (n = 0; n < 9; n++) {
-		if (avail & 1 << n)
-			continue;
 		for (i = grow; i < grow + 3; i++) {
 			for (j = gcol; j < gcol + 3; j++) {
 				if (i == row && j == col)
