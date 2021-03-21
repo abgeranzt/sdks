@@ -14,3 +14,15 @@ void sdk_parsein(struct sdk *s)
 		getchar();
 	}
 }
+
+
+/* Print sudoku cells in machine readable form.
+ */
+void sdk_print(struct sdk *s)
+{
+	char c;
+	for (int i = 0; i < SDK_SQ; i++) {
+		c = ((i + 1) % 9) ? ',' : '\n';
+		printf("%d%c", s->cells[i].number, c);
+	}
+}
