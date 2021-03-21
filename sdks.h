@@ -1,16 +1,9 @@
 #define SDK_W 9
+#define SDK_SQ SDK_W * SDK_W
 
-enum status { SUCCESS, FAILURE };
-enum numbers {
-	ONE = 1,
-	TWO = 2,
-	THREE = 4,
-	FOUR = 8,
-	FIVE = 16,
-	SIX = 32,
-	SEVEN = 64,
-	EIGHT = 128,
-	NINE = 256
+struct pos {
+	int row;
+	int col;
 };
 
 struct cell {
@@ -26,10 +19,11 @@ struct sdk {
 
 /* io.c */
 void sdk_parsein(struct sdk *s);
+void sdk_print(struct sdk *s);
 
 /* sdks.c */
 struct sdk *sdk_init(void);
-void sdk_index(struct sdk *s);
+void cell_index(struct sdk *s, int row, int col);
 
 /* check.c */
 int sdk_checkrow(struct sdk *s, int row, int col);

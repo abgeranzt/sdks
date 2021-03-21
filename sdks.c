@@ -11,16 +11,16 @@ struct sdk *sdk_init(void)
 	return s;
 }
 
-/* Iterate through every cell and check available numbers */
-void sdk_index(struct sdk *s)
+/* Check possible numbers for a cell through multiple tests. */
+void cell_index(struct sdk *s, int row, int col)
 {
-	int av, i, j;
+	s->rows[row][col].avail =
+		sdk_checkrow(s, row, col) &
+		sdk_checkcol(s, row, col) &
+		sdk_checkgrp(s, row, col);
+}
+
 	for (i = 0; i < SDK_W; i++) {
-		for (j = 0; j < SDK_W; j++) {
-			av = sdk_checkrow(s, i, j);
-			av &= sdk_checkcol(s, i, j);
-			av &= sdk_checkgrp(s, i, j);
-			s->rows[i][j].avail = av;
 		}
 	}
 }
