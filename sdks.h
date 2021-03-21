@@ -24,6 +24,7 @@ void sdk_print(struct sdk *s);
 /* sdks.c */
 struct sdk *sdk_init(void);
 void cell_index(struct sdk *s, int row, int col);
+void sdk_fill(struct sdk *s);
 
 /* check.c */
 int sdk_checkrow(struct sdk *s, int row, int col);

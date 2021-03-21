@@ -20,7 +20,19 @@ void cell_index(struct sdk *s, int row, int col)
 		sdk_checkgrp(s, row, col);
 }
 
+/* Iterate through every cell and fill in numbers where possible. */
+void sdk_fill(struct sdk *s)
+{
+	int n, i, j;
 	for (i = 0; i < SDK_W; i++) {
+	for (j = 0; j < SDK_W; j++) {
+		cell_index(s, i, j);
+		for (n = 0; n < SDK_W; n++) {
+			if (s->rows[i][j].avail & 1 << n) {
+				s->rows[i][j].number = n + 1;
+				break;
+			}
 		}
+	}
 	}
 }
