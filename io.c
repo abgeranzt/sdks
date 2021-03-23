@@ -13,7 +13,7 @@
 void sdk_parsein(struct sdk *s)
 {
 	for (int i = 0; i < SDK_SQ; i++) {
-		s->cells[i].number = getchar() - '0';
+		s->cells[i] = getchar() - '0';
 		/* Next char is a delimiter. */
 		getchar();
 	}
@@ -27,6 +27,6 @@ void sdk_print(struct sdk *s)
 	char c;
 	for (int i = 0; i < SDK_SQ; i++) {
 		c = ((i + 1) % 9) ? ',' : '\n';
-		printf("%d%c", s->cells[i].number, c);
+		printf("%d%c", s->cells[i], c);
 	}
 }
