@@ -4,6 +4,10 @@
 
 #include "sdks.h"
 
+/* io.c
+ * This file contains procedures to read from stdin and write to stdout.
+ */
+
 /* Parse stdin and populate sudoku structure.
  */
 void sdk_parsein(struct sdk *s)
