@@ -25,7 +25,7 @@ int cell_fill(struct sdk *s, int row, int col)
 	av = cell_check(s, row, col);
 	for (n = 0; n < SDK_W; n++) {
 		/* Match. */
-		if (av & 1 << n) {
+		if ((av & 1 << n) == (av | 1 << n)) {
 			s->rows[row][col] = n + 1;
 			return TRUE;
 		}
