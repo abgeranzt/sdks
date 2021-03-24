@@ -1,7 +1,7 @@
 #include "sdks.h"
 
 /* cell.c
- * This file contains procedures that check availables on a sudoku cell.
+ * This file contains procedures that check available numbers on a sudoku cell.
  * The methods used for this currently include:
  * 	- checking the cell's row
  * 	- checking the cell's column
@@ -10,7 +10,7 @@
  * TODO add more if necessary
  */
 
-/* Perform all checks on the cell and returns availables as bit flags. */
+/* Perform all checks on the cell and returns available numbers as bit flags. */
 int cell_check(struct sdk *s, int row, int col)
 {
 	return	cell_checkrow(s, row, col) &
@@ -34,7 +34,7 @@ int cell_fill(struct sdk *s, int row, int col)
 
 }
 
-/* Check row for availables and return them as bit flags in av. */
+/* Check row for available numbers and return them as bit flags in av. */
 int cell_checkrow(struct sdk *s, int row, int col)
 {
 	int av, n, i;
@@ -56,7 +56,7 @@ int cell_checkrow(struct sdk *s, int row, int col)
 	return av;
 }
 
-/* Check column for availables and return them as bit flags in av.
+/* Check column for available numbers and return them as bit flags in av.
  * Logically equivalent to checkrow().
  */
 int cell_checkcol(struct sdk *s, int row, int col)
@@ -79,7 +79,7 @@ int cell_checkcol(struct sdk *s, int row, int col)
 	return av;
 }
 
-/* Check group of 3x3 cells for availables and return them as bit flags in av. */
+/* Check group of 3x3 cells for available numbers and return them as bit flags in av. */
 int cell_checkgrp(struct sdk *s, int row, int col)
 {
 	int grow, gcol;
