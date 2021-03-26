@@ -12,8 +12,12 @@
  */
 void sdk_parsein(struct sdk *s)
 {
-	for (int i = 0; i < SDK_SQ; i++) {
-		s->cells[i] = getchar() - '0';
+	int n, i;
+	for (i = 0; i < SDK_SQ; i++) {
+		n = getchar() - '0';
+		s->cells[i].num = n;
+		if (!n)
+			s->nfree++;
 		/* Next char is a delimiter. */
 		getchar();
 	}
@@ -27,6 +31,6 @@ void sdk_print(struct sdk *s)
 	char c;
 	for (int i = 0; i < SDK_SQ; i++) {
 		c = ((i + 1) % 9) ? ',' : '\n';
-		printf("%d%c", s->cells[i], c);
+		printf("%d%c", s->cells[i].num, c);
 	}
 }

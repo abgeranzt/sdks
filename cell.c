@@ -11,26 +11,30 @@
  */
 
 /* Perform all checks on the cell and returns available numbers as bit flags. */
-int cell_check(struct sdk *s, int row, int col)
+int cell_index_basic(struct sdk *s, int row, int col)
 {
+	/* TODO is splitting this function necessary?
+	 * -> See sdk_index_adv.*/
 	return	cell_checkrow(s, row, col) &
 		cell_checkcol(s, row, col) &
 		cell_checkgrp(s, row, col);
 }
 
-/* Attempt to fill the cell and return TRUE if successfull. */
+/* Attempt to fill the cell and return the filled-in number if successfull.
+ * Return 0 otherwise.
+ */
 int cell_fill(struct sdk *s, int row, int col)
 {
-	int av, n;
-	av = cell_check(s, row, col);
+	int n, av;
+	av = s->rows[row][col].av;
 	for (n = 0; n < SDK_W; n++) {
-		/* Match. */
+		/* Unambigious match. */
 		if ((av & 1 << n) == (av | 1 << n)) {
-			s->rows[row][col] = n + 1;
-			return TRUE;
+			s->rows[row][col].num = ++n;
+			return n;
 		}
 	}
-	return FALSE;
+	return 0;
 
 }
 
@@ -45,7 +49,7 @@ int cell_checkrow(struct sdk *s, int row, int col)
 			if (i == col)
 				continue;
 			/* exists. */
-			if (s->rows[row][i] == n + 1) {
+			if (s->rows[row][i].num == n + 1) {
 				goto nloop;
 			}
 		}
@@ -69,7 +73,7 @@ int cell_checkcol(struct sdk *s, int row, int col)
 			if (i == row)
 				continue;
 			/* exists. */
-			if (s->rows[i][col] == n + 1)
+			if (s->rows[i][col].num == n + 1)
 				goto nloop;
 		}
 		av |= 1 << n;
@@ -82,20 +86,19 @@ int cell_checkcol(struct sdk *s, int row, int col)
 /* Check group of 3x3 cells for available numbers and return them as bit flags in av. */
 int cell_checkgrp(struct sdk *s, int row, int col)
 {
-	int grow, gcol;
+	int av, n, gr, gc, i, j;
 	/* Specify group boundaries. */
-	for (grow = row; grow % 3; grow--);
-	for (gcol = col; gcol % 3; gcol--);
-	int av, n, i, j;
+	gr = row - row % 3;
+	gc = col - col % 3;
 	av = 0;
 	for (n = 0; n < SDK_W; n++) {
-		for (i = grow; i < grow + 3; i++) {
-		for (j = gcol; j < gcol + 3; j++) {
+		for (i = gr; i < gr + 3; i++) {
+		for (j = gc; j < gc + 3; j++) {
 			/* Skip current cell. */
 			if (i == row && j == col)
 				continue;
 			/* exists. */
-			if (s->rows[i][j] == n + 1)
+			if (s->rows[i][j].num == n + 1)
 				goto nloop;
 		}
 		}
