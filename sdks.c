@@ -1,24 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "sdks.h"
 
 int main()
 {
 	struct sdk *s = sdk_init();
 	sdk_parsein(s);
-	int n;
-	/*
-	do {
-		n = sdk_fill(s);
-		printf("n: %d\n", n);
-	} while (n != 0);
-	*/
-
+	sdk_index_basic(s);
+	printf("%d\n", s->nfree);
+	int n = sdk_fill(s);
+	printf("%d\n", s->nfree);
 	sdk_print(s);
-	for (int i = 0; i < 1; i++) {
+	//printf("\n%d", n);
+	/*
+	for (int i = 0; i < 2; i++) {
 		sdk_fill(s);
+		printf("\n");
 		sdk_print(s);
 	}
+	*/
 	return 0;
 }

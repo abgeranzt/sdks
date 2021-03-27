@@ -10,6 +10,7 @@
 struct sdk *sdk_init(void)
 {
 	struct sdk *s = (struct sdk*) malloc(sizeof(struct sdk));
+	s->nfree = 0;
 	for (int i = 0; i < SDK_W; i++)
 		s->rows[i] = &s->cells[i * SDK_W];
 	return s;
@@ -23,7 +24,6 @@ struct sdk *sdk_init(void)
 int sdk_fill(struct sdk *s)
 {
 	int nc, n, i, j;
-	sdk_index_basic(s);
 	nc = 0;
 	for (i = 0; i < SDK_W; i++) {
 	for (j = 0; j < SDK_W; j++) {
@@ -36,7 +36,9 @@ int sdk_fill(struct sdk *s)
 	}
 	/* TODO Advanced indexing */
 	//if (!nc) ...
-	return s->nfree ? n + sdk_fill(s) : n;
+	return n;
+	/* TODO Re-enable recursion! */
+	//return s->nfree ? n + sdk_fill(s) : n;
 }
 
 /* Iterate through the sudoku and index all available numbers for each
@@ -61,6 +63,11 @@ void sdk_index_basic(struct sdk *s)
  */
 void sdk_index_adv(struct sdk *s)
 {
+	int i, j;
+	/* Index rows. */
+	for (i = 0; i < SDK_W; i++) {
+
+	}
 	/* TODO continue here. */
 }
 
