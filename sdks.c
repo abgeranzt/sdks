@@ -23,13 +23,15 @@
 
 #include <stdlib.h>
 
+#include "log.h"
 #include "sdks.h"
-
 
 /* Initialize Sudoku structure and return pointer to it. */
 struct Sudoku *sdks_init()
 {
-	return malloc(sizeof(struct Sudoku));
+	struct Sudoku *sdk = malloc(sizeof(struct Sudoku));
+	sdk->freeCells = 0;
+	return sdk;
 }
 
 
@@ -40,16 +42,22 @@ int sdks_fill(struct Sudoku *sdk)
 	int n = 0;
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
+			LOG("Skipped cell %d\n", i);
 			continue;
 		}
+		LOG("Filling cell %d...", i);
 		for (j = 1; j < SDK_ROWS + 1; j++) {
 			if (sdk->cells[i].avail == 1 << j) {
 				sdk->cells[i].num = j;
 				sdk->freeCells--;
 				n++;
-				break;
+				LOG("%d\n");
+				goto filled;
 			}
 		}
+		LOG("skipped\n");
+		filled:
+			continue;
 	}
 	return n;
 }

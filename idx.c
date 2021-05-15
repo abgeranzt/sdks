@@ -24,9 +24,10 @@
 #include <math.h>
 
 #include "sdks.h"
+#include "log.h"
 
-static void idx_index_row(struct Cell *row);
-static void idx_index_row_adv(struct Cell *row);
+static void idx_index_row(struct Cell *cells, int row);
+static void idx_index_row_adv(struct Cell *cells, int row);
 static void idx_index_col(struct Cell *cells, int col);
 static void idx_index_col_adv(struct Cell *cells, int col);
 static void idx_index_grp(struct Cell *cells, int row, int col);
@@ -39,16 +40,18 @@ void idx_index_init(struct Sudoku *sdk)
 {
 	int i;
 	int n = 0;
+	LOG("Performing inital index...\n");
 	/* Set bit flags for all possible numbers. */
-	for (i = 0; i < SDK_COLS; i++) {
+	for (i = 1; i < SDK_COLS + 1; i++) {
 		n |= 1 << i;
 	}
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
+			LOG("Skipped cell %d\n", i);
 			continue;
 		}
 		sdk->cells[i].avail = n;
-		sdk->freeCells++;
+		LOG("Indexed cell %d\n", i);
 	}
 }
 
@@ -57,13 +60,13 @@ void idx_index_init(struct Sudoku *sdk)
 void idx_index(struct Cell *cells)
 {
 	int i, j;
-	for (i = 0; i < SDK_ROWS; i += SDK_COLS) {
-		idx_index_row(&cells[i]);
+	for (i = 0; i < SDK_ROWS; i++) {
+		idx_index_row(cells, i);
 	}
 	for (i = 0; i < SDK_COLS; i++) {
 		idx_index_col(cells, i);
 	}
-	for (i = 0; i < SDK_ROWS; i += SDK_COLS) {
+	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
 		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
 			idx_index_grp(cells, i, j);
 		}
@@ -73,13 +76,13 @@ void idx_index(struct Cell *cells)
 void idx_index_adv(struct Cell *cells)
 {
 	int i, j;
-	for (i = 0; i < SDK_ROWS; i += SDK_COLS) {
-		idx_index_row_adv(&cells[i]);
+	for (i = 0; i < SDK_ROWS; i++) {
+		idx_index_row_adv(cells, i);
 	}
 	for (i = 0; i < SDK_COLS; i++) {
 		idx_index_col_adv(cells, i);
 	}
-	for (i = 0; i < SDK_ROWS; i += SDK_COLS) {
+	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
 		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
 			idx_index_grp_adv(cells, i, j);
 		}
@@ -87,45 +90,53 @@ void idx_index_adv(struct Cell *cells)
 }
 
 /* Find existing numbers in a row and remove them from each cell's available numbers. */
-static void idx_index_row(struct Cell *row)
+static void idx_index_row(struct Cell *cells, int row)
 {
 	int i;
 	int n = 0;
-	for (i = 0; i < SDK_COLS; i++) {
-		if (row[i].num) {
-			n |= 1 << row[i].num;
+	LOG("Indexing row %d...\n", row);
+	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+		if (cells[i].num) {
+			n |= 1 << cells[i].num;
+			LOG("Found %d\n", cells[i].num);
 		}
 	}
-	for (i = 0; i < SDK_COLS; i++) {
-		if (row[i].num) {
+	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
+	LOG("Updating cells...\n");
+	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+		if (cells[i].num) {
+			LOG("Skipped cell %d\n", i);
 			continue;
 		}
-		row[i].avail &= ~n;
+		cells[i].avail &= ~n;
+		LOG("Cell %d - avail: %x\n", i, cells[i].avail);
+
 	}
+	LOG("Row %d index done\n", row);
 }
 
 /* Count the possible fields in a row for each number
  * and trim availble numbers accordingly.
  */
-static void idx_index_row_adv(struct Cell *row)
+static void idx_index_row_adv(struct Cell *cells, int row)
 {
 	int i, j, pos;
 	int n = 0;
 	for (i = 1; i < SDK_COLS + 1; i++) {
 		/* Skip if number already filled in */
-		for (j = 0; j < SDK_COLS; j++) {
-			if (row[j].num == i) {
+		for (j = row * SDK_COLS; j < (row + 1) * SDK_COLS; j++) {
+			if (cells[j].num == i) {
 				goto filled;
-			} else if (row[j].num) {
+			} else if (cells[j].num) {
 				continue;
 			}
-			if (row[j].avail & 1 << i) {
+			if (cells[j].avail & 1 << i) {
 				n++;
 				pos = j;
 			}
 		}
 		if (n == 1) {
-			row[pos].avail &= 1 << i;
+			cells[pos].avail &= 1 << i;
 		}
 		filled:
 			continue;
@@ -137,16 +148,24 @@ static void idx_index_col(struct Cell *cells, int col)
 {
 	int i;
 	int n = 0;
+	LOG("Indexing column %d...\n", col);
 	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
 		if (cells[i].num) {
 			n |= 1 << cells[i].num;
+			LOG("Found %d\n", cells[i].num);
 		}
 	}
+	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
+	LOG("Updating cells...\n");
 	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
 		if (cells[i].num) {
-		cells[i].avail &= ~n;
+			LOG("Skipped cell %d\n", i);
+			continue;
 		}
+		cells[i].avail &= ~n;
+		LOG("Cell %d - avail: %x\n", i, cells[i].avail);
 	}
+	LOG("Column %d index done\n", col);
 }
 
 /* Count the possible fields in a column for each number
@@ -182,6 +201,7 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 {
 	int i, j;
 	int n = 0;
+	LOG("Indexing group %d:%d...", row , col);
 	for (
 		i = row * SDK_COLS + col;
 		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
@@ -190,9 +210,12 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 		for (j = i; j < i + sqrt(SDK_COLS); j++) {
 			if (cells[j].num) {
 				n |= 1 << cells[j].num;
+				LOG("Found %d\n", cells[j].num);
 			}
 		}
 	}
+	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
+	LOG("Updating cells...\n");
 	for (
 		i = row * SDK_COLS + col;
 		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
@@ -200,10 +223,14 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 	) {
 		for (j = i; j < i + sqrt(SDK_COLS); j++) {
 			if (cells[j].num) {
-				cells[j].avail &= ~n;
+				LOG("Skipped cell %d\n", j);
+				continue;
 			}
+			cells[j].avail &= ~n;
+			LOG("Cell %d - avail: %x\n", j, cells[j].avail);
 		}
 	}
+	LOG("Group %d:%d index done\n", row, col);
 }
 
 static void idx_index_grp_adv(struct Cell *cells, int row, int col)

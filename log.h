@@ -16,35 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define SDK_CELLS 81
-#define SDK_ROWS 9
-#define SDK_COLS 9
-#define SDK_AVAIL_DEF 0x3fe
-
-/* Available numbers are stored as bit flags:
- * One as 1 << 1 (...010), two as 1 << 2 (...100) etc.
- * The rightmost bit is ignored.
+/* log.h
+ * This file contains macros for optional logging for debugging purposes.
  */
-struct Cell {
-	int avail;
-	int num;
-};
 
-struct Sudoku {
-	struct Cell cells[SDK_CELLS];
-	int freeCells;
-};
+#include <stdio.h>
 
-/* sdks.c */
-struct Sudoku *sdks_init();
-int sdks_fill(struct Sudoku *sdk);
+#define LOG(...) (void)0
 
-/* idx.c */
-void idx_index_init(struct Sudoku *sdk);
-void idx_index(struct Cell *cells);
-void idx_index_adv(struct Cell *cells);
-
-/* io.c */
-void io_parse(struct Sudoku *sdk);
-void io_print(struct Sudoku *sdk);
-void io_print_stack(struct Sudoku *sdk);
+#if defined(DEBUG)
+#undef LOG
+#define LOG(...) fprintf(stderr, __VA_ARGS__)
+#endif

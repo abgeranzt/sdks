@@ -40,8 +40,7 @@ void io_parse(struct Sudoku *sdk)
 }
 
 
-/* Print sudoku cells in machine readable form.
- */
+/* Print sudoku cells in machine readable form. */
 void io_print(struct Sudoku *sdk)
 {
 	char c;
@@ -50,4 +49,19 @@ void io_print(struct Sudoku *sdk)
 		c = ((i + 1) % 9) ? ',' : '\n';
 		printf("%d%c", sdk->cells[i].num, c);
 	}
+}
+
+
+/* Print the whole Sudoku structure with relevant fields to stderr. */
+void io_print_stack(struct Sudoku *sdk)
+{
+	int i;
+	fprintf(stderr, "--- stack dump ---\n");
+	for (i = 0; i < SDK_CELLS; i++) {
+		fprintf(
+			stderr, "cell: %d num: %d avail: %x\n",
+			i, sdk->cells[i].num, sdk->cells[i].avail
+		);
+	}
+	fprintf(stderr, "--- end dump ---\n");
 }
