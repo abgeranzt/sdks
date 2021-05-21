@@ -77,9 +77,14 @@ void idx_index(struct Cell *cells)
 void idx_index_adv(struct Cell *cells)
 {
 	int i, j;
+	#ifdef VERBOSE
+		char *mod = "idx_index_adv";
+	#endif
+	LOG("%s: Indexing rows\n", mod);
 	for (i = 0; i < SDK_ROWS; i++) {
 		idx_index_row_adv(cells, i);
 	}
+	LOG("%s: Indexing columns\n", mod);
 	for (i = 0; i < SDK_COLS; i++) {
 		idx_index_col_adv(cells, i);
 	}
@@ -101,25 +106,26 @@ static void idx_index_row(struct Cell *cells, int row)
 {
 	int i;
 	int n = 0;
-	LOG("Indexing row %d...\n", row);
+	#ifdef VERBOSE
+		char *mod = "idx_index_row";
+	#endif
+	LOG("%s: Indexing row %d\n", mod, row);
 	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
 		if (cells[i].num) {
 			n |= 1 << cells[i].num;
-			LOG("Found %d\n", cells[i].num);
+			LOG("%s: Found existing number %d\n", mod, cells[i].num);
 		}
 	}
-	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
-	LOG("Updating cells...\n");
+	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
+	LOG("%s: Updating cells\n", mod);
 	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
 		if (cells[i].num) {
-			LOG("Skipped cell %d\n", i);
 			continue;
 		}
 		cells[i].avail &= ~n;
-		LOG("Cell %d - avail: %x\n", i, cells[i].avail);
-
+		LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
 	}
-	LOG("Row %d index done\n", row);
+	LOG("%s: Done\n", mod);
 }
 
 /* Count the possible fields in a row for each number
@@ -130,6 +136,10 @@ static int idx_index_row_adv(struct Cell *cells, int row)
 {
 	int i, j, pos;
 	int n = 0;
+	#ifdef VERBOSE
+		char *mod = "idx_index_row_adv";
+	#endif
+	LOG("%s: Indexing row %d\n", mod, row);
 	for (i = 1; i < SDK_COLS + 1; i++) {
 		/* Skip if number already filled in */
 		for (j = row * SDK_COLS; j < (row + 1) * SDK_COLS; j++) {
@@ -145,7 +155,7 @@ static int idx_index_row_adv(struct Cell *cells, int row)
 		}
 		switch (n) {
 		case 0:
-			LOG("Row %d: No field available for number %d\n", row, i);
+			LOG("%s: No field in row available for number %d\n", mod, row, i);
 			return 0;
 		case 1:
 			cells[pos].avail &= 1 << i;
@@ -154,6 +164,7 @@ static int idx_index_row_adv(struct Cell *cells, int row)
 		filled:
 			continue;
 	}
+	LOG("%s: Done\n", mod);
 	return 1;
 }
 
@@ -162,24 +173,26 @@ static void idx_index_col(struct Cell *cells, int col)
 {
 	int i;
 	int n = 0;
-	LOG("Indexing column %d...\n", col);
+	#ifdef VERBOSE
+		char *mod = "idx_index_col";
+	#endif
+	LOG("%s: Indexing column %d\n", mod, col);
 	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
 		if (cells[i].num) {
 			n |= 1 << cells[i].num;
-			LOG("Found %d\n", cells[i].num);
+			LOG("%s: Found existing number %d\n", mod, cells[i].num);
 		}
 	}
-	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
-	LOG("Updating cells...\n");
+	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
+	LOG("%s: Updating cells\n", mod);
 	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
 		if (cells[i].num) {
-			LOG("Skipped cell %d\n", i);
 			continue;
 		}
 		cells[i].avail &= ~n;
-		LOG("Cell %d - avail: %x\n", i, cells[i].avail);
+		LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
 	}
-	LOG("Column %d index done\n", col);
+	LOG("%s: Done\n", mod);
 }
 
 /* Count the possible fields in a column for each number
@@ -190,6 +203,10 @@ static int idx_index_col_adv(struct Cell *cells, int col)
 {
 	int i, j, pos;
 	int n = 0;
+	#ifdef VERBOSE
+		char *mod = "idx_index_col_adv";
+	#endif
+	LOG("%s: Indexing column %d\n", mod, col);
 	for (i = 1; i < SDK_COLS + 1; i++) {
 		for (j = col; j < SDK_CELLS; j += SDK_COLS) {
 			if (cells[j].num == i) {
@@ -204,7 +221,7 @@ static int idx_index_col_adv(struct Cell *cells, int col)
 		}
 		switch (n) {
 		case 0:
-			LOG("Column %d: No field available for number %d\n", col, i);
+			LOG("%s: No field in row available for number %d\n", mod, row, i);
 			return 0;
 		case 1:
 			cells[pos].avail &= 1 << i;
@@ -213,6 +230,7 @@ static int idx_index_col_adv(struct Cell *cells, int col)
 		filled:
 			continue;
 	}
+	LOG("%s: Done\n", mod);
 	return 1;
 }
 
@@ -221,7 +239,10 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 {
 	int i, j;
 	int n = 0;
-	LOG("Indexing group %d:%d...", row , col);
+	#ifdef VERBOSE
+		char *mod = "idx_index_grp";
+	#endif
+	LOG("%s: Indexing group %d:%d", mod, row , col);
 	for (
 		i = row * SDK_COLS + col;
 		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
@@ -230,12 +251,12 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 		for (j = i; j < i + sqrt(SDK_COLS); j++) {
 			if (cells[j].num) {
 				n |= 1 << cells[j].num;
-				LOG("Found %d\n", cells[j].num);
+				LOG("%s: Found existing number %d\n", mod, cells[i].num);
 			}
 		}
 	}
-	LOG("Available numbers: %x\n", SDK_AVAIL_DEF ^ n);
-	LOG("Updating cells...\n");
+	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
+	LOG("%s: Updating cells\n", mod);
 	for (
 		i = row * SDK_COLS + col;
 		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
@@ -247,10 +268,10 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 				continue;
 			}
 			cells[j].avail &= ~n;
-			LOG("Cell %d - avail: %x\n", j, cells[j].avail);
+			LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
 		}
 	}
-	LOG("Group %d:%d index done\n", row, col);
+	LOG("%s: Done\n", mod);
 }
 
 /* Count the possible fields in a group for each number
@@ -261,6 +282,10 @@ static int idx_index_grp_adv(struct Cell *cells, int row, int col)
 {
 	int i, j, k, pos;
 	int n = 0;
+	#ifdef VERBOSE
+		char *mod = "idx_index_grp_adv";
+	#endif
+	LOG("%s: Indexing group %d:%d", mod, row , col);
 	for (i = 1; i < SDK_COLS + 1; i++) {
 		for (
 			j = row * SDK_COLS + col;
@@ -281,7 +306,7 @@ static int idx_index_grp_adv(struct Cell *cells, int row, int col)
 		}
 		switch (n) {
 		case 0:
-			LOG("Group %d:%d: No field available for number %d\n", row, col, i);
+			LOG("%s: No field in row available for number %d\n", mod, row, i);
 			return 0;
 		case 1:
 			cells[pos].avail &= 1 << i;
@@ -290,5 +315,6 @@ static int idx_index_grp_adv(struct Cell *cells, int row, int col)
 		filled:
 			continue;
 	}
+	LOG("%s: Done\n", mod);
 	return 1;
 }

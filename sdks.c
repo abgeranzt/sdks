@@ -40,12 +40,15 @@ int sdks_fill(struct Sudoku *sdk)
 {
 	int i, j;
 	int n = 0;
+	#ifdef VERBOSE
+		char *mod = "idx_index_init";
+	#endif
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
-			LOG("Skipped cell %d\n", i);
+			LOG("%s: Skipped filled cell %d\n", mod, i);
 			continue;
 		}
-		LOG("Filling cell %d...", i);
+		LOG("%s: Filling cell %d", mod, i);
 		for (j = 1; j < SDK_ROWS + 1; j++) {
 			if (sdk->cells[i].avail == 1 << j) {
 				sdk->cells[i].num = j;
@@ -55,7 +58,7 @@ int sdks_fill(struct Sudoku *sdk)
 				goto filled;
 			}
 		}
-		LOG("Skipped cell %d\n", i);
+		LOG("%s: Failed to fill cell %d\n", mod, i);
 		filled:
 		continue;
 	}
