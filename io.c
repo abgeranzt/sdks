@@ -24,8 +24,7 @@
 
 #include "sdks.h"
 
-/* Parse stdin and populate sudoku structure.
- */
+/* Parse stdin and populate sudoku structure. */
 void io_parse(struct Sudoku *sdk)
 {
 	int n, i;

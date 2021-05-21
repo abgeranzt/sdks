@@ -33,26 +33,23 @@ static void idx_index_col_adv(struct Cell *cells, int col);
 static void idx_index_grp(struct Cell *cells, int row, int col);
 static void idx_index_grp_adv(struct Cell *cells, int row, int col);
 
-/* Index Sudoku for the first time.
- * This is a seperate function because a lot of what it does is only required once.
- */
+/* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
 {
 	int i;
-	int n = 0;
-	LOG("Performing inital index...\n");
-	/* Set bit flags for all possible numbers. */
-	for (i = 1; i < SDK_COLS + 1; i++) {
-		n |= 1 << i;
-	}
+	#ifdef VERBOSE
+		char *mod = "idx_index_init";
+	#endif
+	LOG("%s: Initializing index\n", mod);
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
-			LOG("Skipped cell %d\n", i);
+			LOG("%s: Skipped cell %d\n", mod, i);
 			continue;
 		}
-		sdk->cells[i].avail = n;
-		LOG("Indexed cell %d\n", i);
+		sdk->cells[i].avail = SDK_AVAIL_DEF;
+		LOG("%s: Indexed cell %d\n", mod, i);
 	}
+	LOG("%s: Done\n", mod);
 }
 
 /* TODO TESTING */
@@ -60,6 +57,10 @@ void idx_index_init(struct Sudoku *sdk)
 void idx_index(struct Cell *cells)
 {
 	int i, j;
+	#ifdef VERBOSE
+		char *mod = "idx_index";
+	#endif
+	LOG("%s: Indexing rows\n", mod);
 	for (i = 0; i < SDK_ROWS; i++) {
 		idx_index_row(cells, i);
 	}
@@ -82,11 +83,17 @@ void idx_index_adv(struct Cell *cells)
 	for (i = 0; i < SDK_COLS; i++) {
 		idx_index_col_adv(cells, i);
 	}
+	LOG("%s: Indexing groups\n", mod);
 	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
 		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
 			idx_index_grp_adv(cells, i, j);
 		}
 	}
+	LOG("%s: Done\n", mod);
+	return 1;
+	failed:
+		LOG("%s: Error while indexing!\n", mod);
+		return 0;
 }
 
 /* Find existing numbers in a row and remove them from each cell's available numbers. */
@@ -117,8 +124,9 @@ static void idx_index_row(struct Cell *cells, int row)
 
 /* Count the possible fields in a row for each number
  * and trim availble numbers accordingly.
+ * Return zero if a number cannot be filled in.
  */
-static void idx_index_row_adv(struct Cell *cells, int row)
+static int idx_index_row_adv(struct Cell *cells, int row)
 {
 	int i, j, pos;
 	int n = 0;
@@ -135,12 +143,18 @@ static void idx_index_row_adv(struct Cell *cells, int row)
 				pos = j;
 			}
 		}
-		if (n == 1) {
+		switch (n) {
+		case 0:
+			LOG("Row %d: No field available for number %d\n", row, i);
+			return 0;
+		case 1:
 			cells[pos].avail &= 1 << i;
+			break;
 		}
 		filled:
 			continue;
 	}
+	return 1;
 }
 
 /* Find existing numbers in a column and remove them from each cell's available numbers. */
@@ -170,8 +184,9 @@ static void idx_index_col(struct Cell *cells, int col)
 
 /* Count the possible fields in a column for each number
  * and trim availble numbers accordingly.
+ * Return zero if a number cannot be filled in.
  */
-static void idx_index_col_adv(struct Cell *cells, int col)
+static int idx_index_col_adv(struct Cell *cells, int col)
 {
 	int i, j, pos;
 	int n = 0;
@@ -187,13 +202,18 @@ static void idx_index_col_adv(struct Cell *cells, int col)
 				pos = j;
 			}
 		}
-		if (n == 1) {
+		switch (n) {
+		case 0:
+			LOG("Column %d: No field available for number %d\n", col, i);
+			return 0;
+		case 1:
 			cells[pos].avail &= 1 << i;
+			break;
 		}
 		filled:
 			continue;
 	}
-
+	return 1;
 }
 
 /* Find existing numbers in a group and remove them from each cell's available numbers. */
@@ -233,7 +253,11 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 	LOG("Group %d:%d index done\n", row, col);
 }
 
-static void idx_index_grp_adv(struct Cell *cells, int row, int col)
+/* Count the possible fields in a group for each number
+ * and trim availble numbers accordingly.
+ * Return zero if a number cannot be filled in.
+ */
+static int idx_index_grp_adv(struct Cell *cells, int row, int col)
 {
 	int i, j, k, pos;
 	int n = 0;
@@ -255,10 +279,16 @@ static void idx_index_grp_adv(struct Cell *cells, int row, int col)
 				}
 			}
 		}
-		if (n == 1) {
+		switch (n) {
+		case 0:
+			LOG("Group %d:%d: No field available for number %d\n", row, col, i);
+			return 0;
+		case 1:
 			cells[pos].avail &= 1 << i;
+			break;
 		}
 		filled:
 			continue;
 	}
+	return 1;
 }
