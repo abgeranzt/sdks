@@ -22,9 +22,10 @@
 
 #include <stdio.h>
 
-#define LOG(...) (void)0
 
-#if defined(DEBUG)
-#undef LOG
-#define LOG(...) fprintf(stderr, __VA_ARGS__)
+#ifdef DEBUG
+	#define LOG(...) fprintf(stderr, __VA_ARGS__)
+	#define VERBOSE 1
+#else
+	#define LOG(...) (void)0
 #endif

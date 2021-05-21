@@ -35,7 +35,7 @@ struct Sudoku *sdks_init()
 }
 
 
-/* Attempt to fill in cells and return the number of filled cells */
+/* Attempt to fill sudoku and return the number of cells filled. */
 int sdks_fill(struct Sudoku *sdk)
 {
 	int i, j;
@@ -55,9 +55,32 @@ int sdks_fill(struct Sudoku *sdk)
 				goto filled;
 			}
 		}
-		LOG("skipped\n");
+		LOG("Skipped cell %d\n", i);
 		filled:
+		continue;
+	}
+	return n;
+}
+
+/* Attempt to solve sudoku using indexing techniques.
+ * Return -1 i
+ * TODO
+ */
+int sdks_solve(struct Sudoku *sdk)
+{
+	int n = 0;
+	int tmp;
+	while (sdk->freeCells) {
+		idx_index(sdk->cells);
+		if ((tmp = sdks_fill(sdk))) {
+			n += tmp;
 			continue;
+		}
+		idx_index_adv(sdk->cells);
+		if ((tmp = sdks_fill(sdk))) {
+			n += tmp;
+			continue;
+		}
 	}
 	return n;
 }
