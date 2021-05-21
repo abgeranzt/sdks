@@ -61,14 +61,14 @@ void idx_index(struct Cell *cells)
 		char *mod = "idx_index";
 	#endif
 	LOG("%s: Indexing rows\n", mod);
-	for (i = 0; i < SDK_ROWS; i++) {
+	for (i = 0; i < SDK_WIDTH; i++) {
 		idx_index_row(cells, i);
 	}
-	for (i = 0; i < SDK_COLS; i++) {
+	for (i = 0; i < SDK_WIDTH; i++) {
 		idx_index_col(cells, i);
 	}
-	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
-		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
+	for (i = 0; i < SDK_WIDTH; i+= sqrt(SDK_WIDTH)) {
+		for (j = 0; j < SDK_WIDTH; j += sqrt(SDK_WIDTH)) {
 			idx_index_grp(cells, i, j);
 		}
 	}
@@ -85,20 +85,20 @@ int idx_index_adv(struct Cell *cells)
 		char *mod = "idx_index_adv";
 	#endif
 	LOG("%s: Indexing rows\n", mod);
-	for (i = 0; i < SDK_ROWS; i++) {
+	for (i = 0; i < SDK_WIDTH; i++) {
 		if (!idx_index_row_adv(cells, i)) {
 			goto failed;
 		}
 	}
 	LOG("%s: Indexing columns\n", mod);
-	for (i = 0; i < SDK_COLS; i++) {
+	for (i = 0; i < SDK_WIDTH; i++) {
 		if (! idx_index_col_adv(cells, i)) {
 			goto failed;
 		}
 	}
 	LOG("%s: Indexing groups\n", mod);
-	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
-		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
+	for (i = 0; i < SDK_WIDTH; i+= sqrt(SDK_WIDTH)) {
+		for (j = 0; j < SDK_WIDTH; j += sqrt(SDK_WIDTH)) {
 			if (!idx_index_grp_adv(cells, i, j)) {
 				goto failed;
 			}
@@ -120,7 +120,7 @@ static void idx_index_row(struct Cell *cells, int row)
 		char *mod = "idx_index_row";
 	#endif
 	LOG("%s: Indexing row %d\n", mod, row);
-	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
 		if (cells[i].num) {
 			n |= 1 << cells[i].num;
 			LOG("%s: Found existing number %d\n", mod, cells[i].num);
@@ -128,7 +128,7 @@ static void idx_index_row(struct Cell *cells, int row)
 	}
 	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
 	LOG("%s: Updating cells\n", mod);
-	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
 		if (cells[i].num) {
 			continue;
 		}
@@ -150,19 +150,19 @@ static int idx_index_row_adv(struct Cell *cells, int row)
 		char *mod = "idx_index_row_adv";
 	#endif
 	LOG("%s: Indexing row %d\n", mod, row);
-	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
 		if (cells[i].num) {
 			avail &= ~(1 << cells[i].num);
 		}
 	}
-	for (n = 1; n < SDK_COLS + 1; n++) {
+	for (n = 1; n < SDK_WIDTH + 1; n++) {
 		/* Skip if the number is already filled in. */
 		if (!(avail & (1 << n))) {
 			LOG("%s: Skipped existing number %d\n", mod, n);
 			continue;
 		}
 		posAvail = 0;
-		for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+		for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
 			if (cells[i].num) {
 				continue;
 			}
@@ -194,7 +194,7 @@ static void idx_index_col(struct Cell *cells, int col)
 		char *mod = "idx_index_col";
 	#endif
 	LOG("%s: Indexing column %d\n", mod, col);
-	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
+	for (i = col; i < SDK_CELLS; i += SDK_WIDTH) {
 		if (cells[i].num) {
 			n |= 1 << cells[i].num;
 			LOG("%s: Found existing number %d\n", mod, cells[i].num);
@@ -202,7 +202,7 @@ static void idx_index_col(struct Cell *cells, int col)
 	}
 	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
 	LOG("%s: Updating cells\n", mod);
-	for (i = col; i < SDK_CELLS; i += SDK_COLS) {
+	for (i = col; i < SDK_CELLS; i += SDK_WIDTH) {
 		if (cells[i].num) {
 			continue;
 		}
@@ -224,8 +224,8 @@ static int idx_index_col_adv(struct Cell *cells, int col)
 		char *mod = "idx_index_col_adv";
 	#endif
 	LOG("%s: Indexing column %d\n", mod, col);
-	for (i = 1; i < SDK_COLS + 1; i++) {
-		for (j = col; j < SDK_CELLS; j += SDK_COLS) {
+	for (i = 1; i < SDK_WIDTH + 1; i++) {
+		for (j = col; j < SDK_CELLS; j += SDK_WIDTH) {
 			if (cells[j].num == i) {
 				goto filled;
 			} else if (cells[j].num) {
@@ -261,11 +261,11 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 	#endif
 	LOG("%s: Indexing group %d:%d", mod, row , col);
 	for (
-		i = row * SDK_COLS + col;
-		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
-		i += SDK_COLS
+		i = row * SDK_WIDTH + col;
+		i < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
+		i += SDK_WIDTH
 	) {
-		for (j = i; j < i + sqrt(SDK_COLS); j++) {
+		for (j = i; j < i + sqrt(SDK_WIDTH); j++) {
 			if (cells[j].num) {
 				n |= 1 << cells[j].num;
 				LOG("%s: Found existing number %d\n", mod, cells[i].num);
@@ -275,11 +275,11 @@ static void idx_index_grp(struct Cell *cells, int row, int col)
 	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
 	LOG("%s: Updating cells\n", mod);
 	for (
-		i = row * SDK_COLS + col;
-		i < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
-		i += SDK_COLS
+		i = row * SDK_WIDTH + col;
+		i < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
+		i += SDK_WIDTH
 	) {
-		for (j = i; j < i + sqrt(SDK_COLS); j++) {
+		for (j = i; j < i + sqrt(SDK_WIDTH); j++) {
 			if (cells[j].num) {
 				LOG("Skipped cell %d\n", j);
 				continue;
@@ -303,13 +303,13 @@ static int idx_index_grp_adv(struct Cell *cells, int row, int col)
 		char *mod = "idx_index_grp_adv";
 	#endif
 	LOG("%s: Indexing group %d:%d", mod, row , col);
-	for (i = 1; i < SDK_COLS + 1; i++) {
+	for (i = 1; i < SDK_WIDTH + 1; i++) {
 		for (
-			j = row * SDK_COLS + col;
-			j < (row + sqrt(SDK_ROWS)) * SDK_COLS + col;
-			j += SDK_COLS
+			j = row * SDK_WIDTH + col;
+			j < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
+			j += SDK_WIDTH
 		) {
-			for (k = j; k < j + sqrt(SDK_COLS); k++) {
+			for (k = j; k < j + sqrt(SDK_WIDTH); k++) {
 				if (cells[k].num == i) {
 					goto filled;
 				} else if (cells[k].num) {

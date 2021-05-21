@@ -17,8 +17,7 @@
  */
 
 #define SDK_CELLS 81
-#define SDK_ROWS 9
-#define SDK_COLS 9
+#define SDK_WIDTH 9
 #define SDK_AVAIL_DEF 0x3fe
 
 /* Available numbers are stored as bit flags:

@@ -49,7 +49,7 @@ int sdks_fill(struct Sudoku *sdk)
 			continue;
 		}
 		LOG("%s: Filling cell %d", mod, i);
-		for (j = 1; j < SDK_ROWS + 1; j++) {
+		for (j = 1; j < SDK_WIDTH + 1; j++) {
 			if (sdk->cells[i].avail == 1 << j) {
 				sdk->cells[i].num = j;
 				sdk->freeCells--;
