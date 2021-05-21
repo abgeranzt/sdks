@@ -144,35 +144,42 @@ static void idx_index_row(struct Cell *cells, int row)
  */
 static int idx_index_row_adv(struct Cell *cells, int row)
 {
-	int i, j, pos;
-	int n = 0;
+	int i, n, pos, posAvail;
+	int avail = SDK_AVAIL_DEF;
 	#ifdef VERBOSE
 		char *mod = "idx_index_row_adv";
 	#endif
 	LOG("%s: Indexing row %d\n", mod, row);
-	for (i = 1; i < SDK_COLS + 1; i++) {
-		/* Skip if number already filled in */
-		for (j = row * SDK_COLS; j < (row + 1) * SDK_COLS; j++) {
-			if (cells[j].num == i) {
-				goto filled;
-			} else if (cells[j].num) {
+	for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+		if (cells[i].num) {
+			avail &= ~(1 << cells[i].num);
+		}
+	}
+	for (n = 1; n < SDK_COLS + 1; n++) {
+		/* Skip if the number is already filled in. */
+		if (!(avail & (1 << n))) {
+			LOG("%s: Skipped existing number %d\n", mod, n);
+			continue;
+		}
+		posAvail = 0;
+		for (i = row * SDK_COLS; i < (row + 1) * SDK_COLS; i++) {
+			if (cells[i].num) {
 				continue;
 			}
-			if (cells[j].avail & 1 << i) {
-				n++;
-				pos = j;
+			if (cells[i].avail & 1 << n) {
+				posAvail++;
+				pos = i;
 			}
 		}
 		switch (n) {
 		case 0:
-			LOG("%s: No field in row available for number %d\n", mod, row, i);
+			LOG("%s: No field in row available for number %d\n", mod, row, n);
 			return 0;
 		case 1:
-			cells[pos].avail &= 1 << i;
+			cells[pos].avail &= 1 << n;
+			LOG("%s: Cell %d - avail: %x\n", mod, pos, n);
 			break;
 		}
-		filled:
-			continue;
 	}
 	LOG("%s: Done\n", mod);
 	return 1;
