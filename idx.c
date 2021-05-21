@@ -27,11 +27,11 @@
 #include "log.h"
 
 static void idx_index_row(struct Cell *cells, int row);
-static void idx_index_row_adv(struct Cell *cells, int row);
+static int idx_index_row_adv(struct Cell *cells, int row);
 static void idx_index_col(struct Cell *cells, int col);
-static void idx_index_col_adv(struct Cell *cells, int col);
+static int idx_index_col_adv(struct Cell *cells, int col);
 static void idx_index_grp(struct Cell *cells, int row, int col);
-static void idx_index_grp_adv(struct Cell *cells, int row, int col);
+static int idx_index_grp_adv(struct Cell *cells, int row, int col);
 
 /* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
@@ -74,7 +74,11 @@ void idx_index(struct Cell *cells)
 	}
 }
 
-void idx_index_adv(struct Cell *cells)
+/* Perform advanced indexing using more sophisticated rules.
+ * Return non-zero upon success and 0 if a logical error is encountered.
+ * I.e. sudoku is unsolvable.
+ */
+int idx_index_adv(struct Cell *cells)
 {
 	int i, j;
 	#ifdef VERBOSE
@@ -82,16 +86,22 @@ void idx_index_adv(struct Cell *cells)
 	#endif
 	LOG("%s: Indexing rows\n", mod);
 	for (i = 0; i < SDK_ROWS; i++) {
-		idx_index_row_adv(cells, i);
+		if (!idx_index_row_adv(cells, i)) {
+			goto failed;
+		}
 	}
 	LOG("%s: Indexing columns\n", mod);
 	for (i = 0; i < SDK_COLS; i++) {
-		idx_index_col_adv(cells, i);
+		if (! idx_index_col_adv(cells, i)) {
+			goto failed;
+		}
 	}
 	LOG("%s: Indexing groups\n", mod);
 	for (i = 0; i < SDK_ROWS; i+= sqrt(SDK_ROWS)) {
 		for (j = 0; j < SDK_COLS; j += sqrt(SDK_COLS)) {
-			idx_index_grp_adv(cells, i, j);
+			if (!idx_index_grp_adv(cells, i, j)) {
+				goto failed;
+			}
 		}
 	}
 	LOG("%s: Done\n", mod);

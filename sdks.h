@@ -43,7 +43,7 @@ int sdks_solve(struct Sudoku *sdk);
 /* idx.c */
 void idx_index_init(struct Sudoku *sdk);
 void idx_index(struct Cell *cells);
-void idx_index_adv(struct Cell *cells);
+int idx_index_adv(struct Cell *cells);
 
 /* io.c */
 void io_parse(struct Sudoku *sdk);
