@@ -56,7 +56,10 @@ struct Sudoku *sdks_init()
 		}
 	}
 	for (j = 0; j < SDK_WIDTH; j++) {
-		i = (j / SDK_GRP_WIDTH) * SDK_WIDTH * SDK_GRP_WIDTH + (j % SDK_GRP_WIDTH) * SDK_GRP_WIDTH;
+		i = (
+			(j / SDK_GRP_WIDTH) * SDK_WIDTH * SDK_GRP_WIDTH +
+			(j % SDK_GRP_WIDTH) * SDK_GRP_WIDTH
+		);
 		for (k = 0; k < SDK_WIDTH; ) {
 			for (l = 0; l < SDK_GRP_WIDTH; l++, k++, i++) {
 				sdk->groups[j][k] = &(sdk->cells[i]);
@@ -67,6 +70,53 @@ struct Sudoku *sdks_init()
 	return sdk;
 }
 
+/* Continously index and fill free sudoku cells until there are none left.
+ * Recursively try out numbers in ambigious cells.
+ * Return 0 if an error is encountered, non-zero otherwise.
+ */
+int sdks_solve(struct Sudoku *sdk)
+{
+	#ifdef VERBOSE
+		char *mod = "sdks_solve";
+	#endif
+	int i, num;
+	while (sdk->freeCells) {
+		LOG("%s: Indexing sudoku\n", mod);
+		if (!idx_index_sdk(sdk)) {
+			goto failure;
+		}
+		LOG("%s: Filling sudoku\n", mod);
+		if (!sdks_fill(sdk)) {
+			LOG("%s: Index inconclusive\n", mod);
+			for (i = 0; i < SDK_CELLS; i++) {
+				if (sdk->cells[i].num) {
+					continue;
+				}
+			}
+			for (num = 1; num <= SDK_WIDTH; num++) {
+				if (!(sdk->cells[i].avail & (1 << num))) {
+					continue;
+				}
+				if (!sdks_stack_push(sdk)) {
+					return 0;
+				}
+				LOG("%s: Trying number %d in cell %d\n", mod, num, i);
+				sdk->cells[i].num = num;
+				if (sdks_solve(sdk)) {
+					goto success;
+				}
+				sdks_stack_pop(sdk);
+			}
+			goto failure;
+		}
+	}
+	success:
+		LOG("%s: Done\n", mod);
+		return 1;
+	failure:
+		LOG("%s: Failed to solve sudoku!\n", mod);
+		return 0;
+}
 
 /* Attempt to fill sudoku and return the number of cells filled.
  * Iterate through the sudoku and attempt to fill all cells.
@@ -94,31 +144,6 @@ static int sdks_fill(struct Sudoku *sdk)
 	}
 	LOG("%s: Filled %d cells, %d remaining\n", mod, nFilled, sdk->freeCells);
 	return nFilled;
-}
-
-/* Continously index and fill free sudoku cells until there are none left.
- * Return -1 if an error is encountered while indexing, 0 if filling failed
- * because of an inconclusive index, non-zero otherwise.
- */
-int sdks_solve(struct Sudoku *sdk)
-{
-	#ifdef VERBOSE
-		char *mod = "sdks_solve";
-	#endif
-	while (sdk->freeCells) {
-		LOG("%s: Indexing sudoku\n", mod);
-		if (!idx_index_sdk(sdk)) {
-			LOG("%s: Error: Failed to index sudoku!\n", mod);
-			return -1;
-		}
-		LOG("%s: Filling sudoku\n", mod);
-		if (!sdks_fill(sdk)) {
-			LOG("%s: Error: Failed to fill sudoku!\n", mod);
-			return 0;
-		}
-	}
-	LOG("%s: Done\n", mod);
-	return 1;
 }
 
 /* Copy sudoku structure onto the buffer stack.
