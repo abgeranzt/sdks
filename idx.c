@@ -24,7 +24,6 @@
 #include <math.h>
 
 #include "sdks.h"
-#include "log.h"
 
 static int idx_index(struct Cell **cells);
 static int idx_index_adv(struct Cell **cells, int numAvail);
