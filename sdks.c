@@ -27,6 +27,7 @@
 #include "log.h"
 #include "sdks.h"
 
+static int sdks_fill(struct Sudoku *sdk);
 static int sdks_stack_push(struct Sudoku *sdk);
 static void sdks_stack_pop(struct Sudoku *sdk);
 
@@ -69,9 +70,9 @@ struct Sudoku *sdks_init()
 
 /* Attempt to fill sudoku and return the number of cells filled.
  * Iterate through the sudoku and attempt to fill all cells.
- * Return the number of cells filled
+ * Return the number of cells filled.
  */
-int sdks_fill(struct Sudoku *sdk)
+static int sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef VERBOSE
 		char *mod = "sdks_fill";
@@ -95,24 +96,25 @@ int sdks_fill(struct Sudoku *sdk)
 	return nFilled;
 }
 
-/* Attempt to solve sudoku using indexing techniques.
- * Return -1 i
- * TODO
+/* Continously index and fill free sudoku cells until there are none left.
+ * Return -1 if an error is encountered while indexing, 0 if filling failed
+ * because of an inconclusive index, non-zero otherwise.
  */
 int sdks_solve(struct Sudoku *sdk)
 {
-	int n = 0;
-	int tmp;
+	#ifdef VERBOSE
+		char *mod = "sdks_solve";
+	#endif
 	while (sdk->freeCells) {
-		idx_index(sdk->cells);
-		if ((tmp = sdks_fill(sdk))) {
-			n += tmp;
-			continue;
+		LOG("%s: Indexing sudoku\n", mod);
+		if (!idx_index_sdk(sdk)) {
+			LOG("%s: Error: Failed to index sudoku!\n", mod);
+			return -1;
 		}
-		idx_index_adv(sdk->cells);
-		if ((tmp = sdks_fill(sdk))) {
-			n += tmp;
-			continue;
+		LOG("%s: Filling sudoku\n", mod);
+		if (!sdks_fill(sdk)) {
+			LOG("%s: Error: Failed to fill sudoku!\n", mod);
+			return 0;
 		}
 	}
 	LOG("%s: Done\n", mod);

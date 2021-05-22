@@ -41,7 +41,6 @@ struct Sudoku {
 
 /* sdks.c */
 struct Sudoku *sdks_init();
-int sdks_fill(struct Sudoku *sdk);
 int sdks_solve(struct Sudoku *sdk);
 
 /* idx.c */
