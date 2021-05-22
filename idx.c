@@ -77,7 +77,7 @@ int idx_index_sdk(struct Sudoku *sdk)
 	LOG("\n%s: Done\n", mod);
 	return 1;
 	failure:
-		LOG("\n%s: Error: encountered invalid segment!\n", mod);
+		LOG("\n%s: Error: Encountered invalid segment!\n", mod);
 		return 0;
 }
 

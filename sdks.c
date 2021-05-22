@@ -59,7 +59,6 @@ struct Sudoku *sdks_init()
 	return sdk;
 }
 
-
 /* Attempt to fill sudoku and return the number of cells filled.
  * Iterate through the sudoku and attempt to fill all cells.
  * Return the number of cells filled
@@ -67,7 +66,7 @@ struct Sudoku *sdks_init()
 int sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef VERBOSE
-		char *mod = "idx_index_init";
+		char *mod = "sdks_fill";
 	#endif
 	int i, num, nFilled;
 	for (i = 0, nFilled = 0; i < SDK_CELLS; i++) {
