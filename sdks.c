@@ -26,11 +26,36 @@
 #include "log.h"
 #include "sdks.h"
 
-/* Initialize Sudoku structure and return pointer to it. */
+/* Initialize Sudoku structure and return pointer to it.
+ * Create and map arrays of pointers to provide a consistent abstracted interface
+ * for rows, columns and groups.
+ */
+/* TODO TESTING */
 struct Sudoku *sdks_init()
 {
+	int i, j, k, l;
 	struct Sudoku *sdk = malloc(sizeof(struct Sudoku));
 	sdk->freeCells = 0;
+	for (i = 0, j = 0; j < SDK_WIDTH; j++) {
+		for (k = 0; k < SDK_WIDTH; k++, i++) {
+			sdk->rows[j][k] = &(sdk->cells[i]);
+		}
+	}
+	for (j = 0; j < SDK_WIDTH; j++) {
+		for (i = j, k = 0; k < SDK_WIDTH; k++) {
+			sdk->cols[j][k] = &(sdk->cells[i]);
+			i += SDK_WIDTH;
+		}
+	}
+	for (j = 0; j < SDK_WIDTH; j++) {
+		i = (j / SDK_GRP_WIDTH) * SDK_WIDTH * SDK_GRP_WIDTH + (j % SDK_GRP_WIDTH) * SDK_GRP_WIDTH;
+		for (k = 0; k < SDK_WIDTH; ) {
+			for (l = 0; l < SDK_GRP_WIDTH; l++, k++, i++) {
+				sdk->groups[j][k] = &(sdk->cells[i]);
+			}
+			i += SDK_WIDTH - SDK_GRP_WIDTH;
+		}
+	}
 	return sdk;
 }
 

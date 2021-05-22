@@ -18,6 +18,7 @@
 
 #define SDK_CELLS 81
 #define SDK_WIDTH 9
+#define SDK_GRP_WIDTH 3
 #define SDK_AVAIL_DEF 0x3fe
 
 /* Available numbers are stored as bit flags:
@@ -32,6 +33,9 @@ struct Cell {
 struct Sudoku {
 	struct Cell cells[SDK_CELLS];
 	int freeCells;
+	struct Cell *rows[SDK_WIDTH][SDK_WIDTH];
+	struct Cell *cols[SDK_WIDTH][SDK_WIDTH];
+	struct Cell *groups[SDK_WIDTH][SDK_WIDTH];
 };
 
 /* sdks.c */
