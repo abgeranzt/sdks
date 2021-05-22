@@ -31,8 +31,6 @@ void io_parse(struct Sudoku *sdk)
 	for (i = 0; i < SDK_CELLS; i++) {
 		n = getchar() - '0';
 		sdk->cells[i].num = n;
-		if (!n)
-			sdk->freeCells++;
 		/* Next char is a delimiter. */
 		getchar();
 	}

@@ -20,7 +20,7 @@
 #define SDK_WIDTH 9
 #define SDK_GRP_WIDTH 3
 #define SDK_AVAIL_DEF 0x3fe
-#define SDK_STACK_SIZE 16
+#define SDK_STACK_SIZE 256
 
 /* Available numbers are stored as bit flags:
  * One as 1 << 1 (...010), two as 1 << 2 (...100) etc.

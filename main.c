@@ -32,22 +32,8 @@ int main()
 	struct Sudoku *sdk = sdks_init();
 	io_parse(sdk);
 	idx_index_init(sdk);
-	sdks_fill(sdk);
-	while (sdk->freeCells) {
-		/* Basic indexing. */
-		idx_index(sdk->cells);
-		if (sdks_fill(sdk)) {
-			continue;
-		}
-		/* Advanced indexing. */
-		idx_index_adv(sdk->cells);
-		if (sdks_fill(sdk)) {
-			continue;
-		}
-		/* Indexing inconclusive. */
-		fprintf(stderr, "Failed to solve sudoku!\n");
+	if (!sdks_solve(sdk)) {
 		io_print(sdk);
-		io_print_stack(sdk);
 		return 1;
 	}
 	io_print(sdk);

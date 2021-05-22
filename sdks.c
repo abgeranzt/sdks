@@ -89,8 +89,8 @@ int sdks_solve(struct Sudoku *sdk)
 		if (!sdks_fill(sdk)) {
 			LOG("%s: Index inconclusive\n", mod);
 			for (i = 0; i < SDK_CELLS; i++) {
-				if (sdk->cells[i].num) {
-					continue;
+				if (!(sdk->cells[i].num)) {
+					break;
 				}
 			}
 			for (num = 1; num <= SDK_WIDTH; num++) {
@@ -98,10 +98,11 @@ int sdks_solve(struct Sudoku *sdk)
 					continue;
 				}
 				if (!sdks_stack_push(sdk)) {
-					return 0;
+					exit(2);
 				}
 				LOG("%s: Trying number %d in cell %d\n", mod, num, i);
 				sdk->cells[i].num = num;
+				sdk->freeCells--;
 				if (sdks_solve(sdk)) {
 					goto success;
 				}
@@ -133,7 +134,7 @@ static int sdks_fill(struct Sudoku *sdk)
 			continue;
 		}
 		for (num = 1; num <= SDK_WIDTH; num++) {
-			if (sdk->cells[i].avail & (1 << num)) {
+			if (sdk->cells[i].avail == (1 << num)) {
 				sdk->cells[i].num = num;
 				sdk->freeCells--;
 				nFilled++;
@@ -172,7 +173,7 @@ static void sdks_stack_pop(struct Sudoku *sdk)
 		char *mod = "sdks_stack_push";
 	#endif
 	LOG("%s: Restoring sudoku from position %d of the buffer stack\n", mod, sdkStackPos);
-	memcpy(sdk, sdkStack[sdkStackPos], sizeof(struct Sudoku));
-	free(sdkStack[sdkStackPos--]);
+	memcpy(sdk, sdkStack[--sdkStackPos], sizeof(struct Sudoku));
+	free(sdkStack[sdkStackPos]);
 	LOG("%s: Done\n", mod);
 }

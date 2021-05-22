@@ -39,11 +39,10 @@ void idx_index_init(struct Sudoku *sdk)
 	LOG("%s: Initializing index\n", mod);
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
-			LOG("%s: Skipped cell %d\n", mod, i);
 			continue;
 		}
 		sdk->cells[i].avail = SDK_AVAIL_DEF;
-		LOG("%s: Indexed cell %d\n", mod, i);
+		sdk->freeCells++;
 	}
 	LOG("%s: Done\n", mod);
 }
@@ -58,26 +57,26 @@ int idx_index_sdk(struct Sudoku *sdk)
 	#endif
 	int i, numAvail;
 	for (i = 0; i < SDK_WIDTH; i++) {
-		LOG("%s: Indexing row %d", mod, i);
+		LOG("%s: Indexing row %d\n", mod, i);
 		numAvail = idx_index(sdk->rows[i]);
 		if (!idx_index_adv(sdk->rows[i], numAvail)) {
 			goto failure;
 		}
-		LOG(", column %d", i);
+		LOG("%s: Indexing column %d\n", mod, i);
 		numAvail = idx_index(sdk->cols[i]);
 		if (!idx_index_adv(sdk->cols[i], numAvail)) {
 			goto failure;
 		}
-		LOG(", group %d", i);
+		LOG("%s: Indexing column %d\n", mod, i);
 		numAvail = idx_index(sdk->groups[i]);
 		if (!idx_index_adv(sdk->groups[i], numAvail)) {
 			goto failure;
 		}
 	}
-	LOG("\n%s: Done\n", mod);
+	LOG("%s: Done\n", mod);
 	return 1;
 	failure:
-		LOG("\n%s: Error: Encountered invalid segment!\n", mod);
+		LOG("%s: Error: Encountered invalid segment!\n", mod);
 		return 0;
 }
 
@@ -105,7 +104,7 @@ static int idx_index(struct Cell **cells)
 		}
 		cells[i]->avail &= numAvail;
 	}
-	LOG("%s: Done\n");
+	LOG("%s: Done\n", mod);
 	return numAvail;
 }
 
@@ -127,7 +126,8 @@ static int idx_index_adv(struct Cell **cells, int numAvail)
 		for (i = 0, posAvail = 0; i < SDK_WIDTH; i++) {
 			if (cells[i]->num) {
 				continue;
-			} else if (cells[i]->avail & (1 << num)) {
+			}
+			if (cells[i]->avail & (1 << num)) {
 				posAvail++;
 				pos = i;
 			}
