@@ -60,34 +60,32 @@ struct Sudoku *sdks_init()
 }
 
 
-/* Attempt to fill sudoku and return the number of cells filled. */
+/* Attempt to fill sudoku and return the number of cells filled.
+ * Iterate through the sudoku and attempt to fill all cells.
+ * Return the number of cells filled
+ */
 int sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef VERBOSE
 		char *mod = "idx_index_init";
 	#endif
-	int i, j;
-	int n = 0;
-	for (i = 0; i < SDK_CELLS; i++) {
+	int i, num, nFilled;
+	for (i = 0, nFilled = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
-			LOG("%s: Skipped filled cell %d\n", mod, i);
 			continue;
 		}
-		LOG("%s: Filling cell %d", mod, i);
-		for (j = 1; j < SDK_WIDTH + 1; j++) {
-			if (sdk->cells[i].avail == 1 << j) {
-				sdk->cells[i].num = j;
+		for (num = 1; num <= SDK_WIDTH; num++) {
+			if (sdk->cells[i].avail & (1 << num)) {
+				sdk->cells[i].num = num;
 				sdk->freeCells--;
-				n++;
-				LOG("%d\n");
-				goto filled;
+				nFilled++;
+				LOG("%s: Filled cell %d with number %d\n", mod, i, num);
+				break;
 			}
 		}
-		LOG("%s: Failed to fill cell %d\n", mod, i);
-		filled:
-		continue;
 	}
-	return n;
+	LOG("%s: Filled %d cells, %d remaining\n", mod, nFilled, sdk->freeCells);
+	return nFilled;
 }
 
 /* Attempt to solve sudoku using indexing techniques.
