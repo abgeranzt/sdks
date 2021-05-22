@@ -21,12 +21,9 @@
  * This file contains the main operating procedure of the program.
  */
 
-#include <stdio.h>
-
 #include "sdks.h"
 
 /* TODO args */
-/* TODO testing */
 int main()
 {
 	struct Sudoku *sdk = sdks_init();

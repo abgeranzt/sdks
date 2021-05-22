@@ -22,6 +22,14 @@
 #define SDK_AVAIL_DEF 0x3fe
 #define SDK_STACK_SIZE 256
 
+#ifdef DEBUG
+	#include <stdio.h>
+	#define LOG(...) fprintf(stderr, __VA_ARGS__)
+	#define VERBOSE 1
+#else
+	#define LOG(...) (void)0
+#endif
+
 /* Available numbers are stored as bit flags:
  * One as 1 << 1 (...010), two as 1 << 2 (...100) etc.
  * The rightmost bit is ignored.
