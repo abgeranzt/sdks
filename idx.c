@@ -77,14 +77,15 @@ int idx_index_sdk(struct Sudoku *sdk)
 	LOG("\n%s: Done\n", mod);
 	return 1;
 	failure:
-		LOG("\n%s: Error: encountered invalid segment!\n", mod);
+		LOG("\n%s: Error: Encountered invalid segment!\n", mod);
 		return 0;
 }
 
 /* Find available numbers in sudoku segment and update each cell's index.
  * Return found numbers as bitflags in an integer.
  */
-static int idx_index(struct Cell **cells) {
+static int idx_index(struct Cell **cells)
+{
 	#ifdef VERBOSE
 		char *mod = "idx_index";
 	#endif
@@ -113,7 +114,8 @@ static int idx_index(struct Cell **cells) {
  * Return 0 upon deeming the segment unsolvable, non-zero otherwise.
  * TODO: More complex rules necessary?
  */
-static int idx_index_adv(struct Cell **cells, int numAvail) {
+static int idx_index_adv(struct Cell **cells, int numAvail)
+{
 	#ifdef VERBOSE
 		char *mod = "idx_index_adv";
 	#endif

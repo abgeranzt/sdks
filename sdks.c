@@ -67,7 +67,7 @@ struct Sudoku *sdks_init()
 int sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef VERBOSE
-		char *mod = "idx_index_init";
+		char *mod = "sdks_fill";
 	#endif
 	int i, num, nFilled;
 	for (i = 0, nFilled = 0; i < SDK_CELLS; i++) {
