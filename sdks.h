@@ -1,37 +1,53 @@
-/* TODO formatting for functions */
+/*
+ * sdks - Sudoku Solver
+ * Copyright (C) 2021 Marcel Engelke
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-#define FALSE 0
-#define TRUE 1
+#define SDK_CELLS 81
+#define SDK_WIDTH 9
+#define SDK_GRP_WIDTH 3
+#define SDK_AVAIL_DEF 0x3fe
+#define SDK_STACK_SIZE 256
 
-#define SDK_GW 3
-#define SDK_W SDK_GW * SDK_GW
-#define SDK_SQ SDK_W * SDK_W
-
-struct cell {
+/* Available numbers are stored as bit flags:
+ * One as 1 << 1 (...010), two as 1 << 2 (...100) etc.
+ * The rightmost bit is ignored.
+ */
+struct Cell {
+	int avail;
 	int num;
-	int av;
 };
 
-struct sdk {
-	struct cell cells[SDK_SQ];
-	struct cell *rows[SDK_W];
-	int nfree;
+struct Sudoku {
+	struct Cell cells[SDK_CELLS];
+	int freeCells;
+	struct Cell *rows[SDK_WIDTH][SDK_WIDTH];
+	struct Cell *cols[SDK_WIDTH][SDK_WIDTH];
+	struct Cell *groups[SDK_WIDTH][SDK_WIDTH];
 };
 
+/* sdks.c */
+struct Sudoku *sdks_init();
+int sdks_solve(struct Sudoku *sdk);
+
+/* idx.c */
+void idx_index_init(struct Sudoku *sdk);
+int idx_index_sdk(struct Sudoku *sdk);
 
 /* io.c */
-void sdk_parsein(struct sdk *s);
-void sdk_print(struct sdk *s);
-
-/* sdk.c */
-struct sdk *sdk_init(void);
-int sdk_fill(struct sdk *s);
-void sdk_index_basic(struct sdk *s);
-void sdk_index_update(struct sdk *s, int n, int row, int col);
-
-/* cell.c */
-int cell_index_basic(struct sdk *s, int row, int col);
-int cell_fill(struct sdk *s, int row, int col);
-int cell_checkrow(struct sdk *s, int row, int col);
-int cell_checkcol(struct sdk *s, int row, int col);
-int cell_checkgrp(struct sdk *s, int row, int col);
+void io_parse(struct Sudoku *sdk);
+void io_print(struct Sudoku *sdk);
+void io_print_stack(struct Sudoku *sdk);
