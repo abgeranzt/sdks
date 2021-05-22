@@ -32,10 +32,10 @@ static int idx_index_adv(struct Cell **cells, int numAvail);
 /* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
 {
-	int i;
 	#ifdef VERBOSE
 		char *mod = "idx_index_init";
 	#endif
+	int i;
 	LOG("%s: Initializing index\n", mod);
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
@@ -53,11 +53,10 @@ void idx_index_init(struct Sudoku *sdk)
  */
 int idx_index_sdk(struct Sudoku *sdk)
 {
-	int i, numAvail;
-	/* TODO move preprocessor directives above var decls */
 	#ifdef VERBOSE
 		char *mod = "idx_index_sdk";
 	#endif
+	int i, numAvail;
 	for (i = 0; i < SDK_WIDTH; i++) {
 		LOG("%s: Indexing row %d", mod, i);
 		numAvail = idx_index(sdk->rows[i]);
@@ -86,11 +85,11 @@ int idx_index_sdk(struct Sudoku *sdk)
  * Return found numbers as bitflags in an integer.
  */
 static int idx_index(struct Cell **cells) {
-	int i;
-	int numAvail = SDK_AVAIL_DEF;
 	#ifdef VERBOSE
 		char *mod = "idx_index";
 	#endif
+	int i;
+	int numAvail = SDK_AVAIL_DEF;
 	LOG("%s: Found: ", mod);
 	for (i = 0; i < SDK_WIDTH; i++) {
 		if (cells[i]->num) {
@@ -115,10 +114,10 @@ static int idx_index(struct Cell **cells) {
  * TODO: More complex rules necessary?
  */
 static int idx_index_adv(struct Cell **cells, int numAvail) {
-	int i, num, pos, posAvail;
 	#ifdef VERBOSE
 		char *mod = "idx_index_adv";
 	#endif
+	int i, num, pos, posAvail;
 	for (num = 1; num <= SDK_WIDTH; num++) {
 		if (!(numAvail & (1 << num))) {
 			continue;

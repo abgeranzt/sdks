@@ -63,11 +63,11 @@ struct Sudoku *sdks_init()
 /* Attempt to fill sudoku and return the number of cells filled. */
 int sdks_fill(struct Sudoku *sdk)
 {
-	int i, j;
-	int n = 0;
 	#ifdef VERBOSE
 		char *mod = "idx_index_init";
 	#endif
+	int i, j;
+	int n = 0;
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
 			LOG("%s: Skipped filled cell %d\n", mod, i);
