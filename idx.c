@@ -26,12 +26,8 @@
 #include "sdks.h"
 #include "log.h"
 
-static void idx_index_row(struct Cell *cells, int row);
-static int idx_index_row_adv(struct Cell *cells, int row);
-static void idx_index_col(struct Cell *cells, int col);
-static int idx_index_col_adv(struct Cell *cells, int col);
-static void idx_index_grp(struct Cell *cells, int row, int col);
-static int idx_index_grp_adv(struct Cell *cells, int row, int col);
+static int idx_index(struct Cell **cells);
+static int idx_index_adv(struct Cell **cells, int numAvail);
 
 /* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
@@ -52,285 +48,98 @@ void idx_index_init(struct Sudoku *sdk)
 	LOG("%s: Done\n", mod);
 }
 
-/* TODO TESTING */
-/* Remove available numbers for each cell based on rules for existing numbers. */
-void idx_index(struct Cell *cells)
-{
-	int i, j;
-	#ifdef VERBOSE
-		char *mod = "idx_index";
-	#endif
-	LOG("%s: Indexing rows\n", mod);
-	for (i = 0; i < SDK_WIDTH; i++) {
-		idx_index_row(cells, i);
-	}
-	for (i = 0; i < SDK_WIDTH; i++) {
-		idx_index_col(cells, i);
-	}
-	for (i = 0; i < SDK_WIDTH; i+= sqrt(SDK_WIDTH)) {
-		for (j = 0; j < SDK_WIDTH; j += sqrt(SDK_WIDTH)) {
-			idx_index_grp(cells, i, j);
-		}
-	}
-}
-
-/* Perform advanced indexing using more sophisticated rules.
- * Return non-zero upon success and 0 if a logical error is encountered.
- * I.e. sudoku is unsolvable.
+/* Iterate through sudoku segments and update each cell's index using elimination rules.
+ * Return 0 upon detecting an unsolvable segment, non-zero otherwise.
  */
-int idx_index_adv(struct Cell *cells)
+int idx_index_sdk(struct Sudoku *sdk)
 {
-	int i, j;
+	int i, numAvail;
+	/* TODO move preprocessor directives above var decls */
 	#ifdef VERBOSE
-		char *mod = "idx_index_adv";
+		char *mod = "idx_index_sdk";
 	#endif
-	LOG("%s: Indexing rows\n", mod);
 	for (i = 0; i < SDK_WIDTH; i++) {
-		if (!idx_index_row_adv(cells, i)) {
-			goto failed;
+		LOG("%s: Indexing row %d", mod, i);
+		numAvail = idx_index(sdk->rows[i]);
+		if (!idx_index_adv(sdk->rows[i], numAvail)) {
+			goto failure;
+		}
+		LOG(", column %d", i);
+		numAvail = idx_index(sdk->cols[i]);
+		if (!idx_index_adv(sdk->cols[i], numAvail)) {
+			goto failure;
+		}
+		LOG(", group %d", i);
+		numAvail = idx_index(sdk->groups[i]);
+		if (!idx_index_adv(sdk->groups[i], numAvail)) {
+			goto failure;
 		}
 	}
-	LOG("%s: Indexing columns\n", mod);
-	for (i = 0; i < SDK_WIDTH; i++) {
-		if (! idx_index_col_adv(cells, i)) {
-			goto failed;
-		}
-	}
-	LOG("%s: Indexing groups\n", mod);
-	for (i = 0; i < SDK_WIDTH; i+= sqrt(SDK_WIDTH)) {
-		for (j = 0; j < SDK_WIDTH; j += sqrt(SDK_WIDTH)) {
-			if (!idx_index_grp_adv(cells, i, j)) {
-				goto failed;
-			}
-		}
-	}
-	LOG("%s: Done\n", mod);
+	LOG("\n%s: Done\n", mod);
 	return 1;
-	failed:
-		LOG("%s: Error while indexing!\n", mod);
+	failure:
+		LOG("\n%s: Error: encountered invalid segment!\n", mod);
 		return 0;
 }
 
-/* Find existing numbers in a row and remove them from each cell's available numbers. */
-static void idx_index_row(struct Cell *cells, int row)
-{
+/* Find available numbers in sudoku segment and update each cell's index.
+ * Return found numbers as bitflags in an integer.
+ */
+static int idx_index(struct Cell **cells) {
 	int i;
-	int n = 0;
+	int numAvail = SDK_AVAIL_DEF;
 	#ifdef VERBOSE
-		char *mod = "idx_index_row";
+		char *mod = "idx_index";
 	#endif
-	LOG("%s: Indexing row %d\n", mod, row);
-	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
-		if (cells[i].num) {
-			n |= 1 << cells[i].num;
-			LOG("%s: Found existing number %d\n", mod, cells[i].num);
+	LOG("%s: Found: ", mod);
+	for (i = 0; i < SDK_WIDTH; i++) {
+		if (cells[i]->num) {
+			numAvail &= ~(1 << cells[i]->num);
+			LOG("%d ", cells[i]->num);
 		}
 	}
-	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
-	LOG("%s: Updating cells\n", mod);
-	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
-		if (cells[i].num) {
+	LOG("\n%s: Available numbers: %x\n", mod, numAvail);
+	for (i = 0; i < SDK_WIDTH; i++) {
+		if (cells[i]->num) {
 			continue;
 		}
-		cells[i].avail &= ~n;
-		LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
+		cells[i]->avail &= numAvail;
 	}
-	LOG("%s: Done\n", mod);
+	LOG("%s: Done\n");
+	return numAvail;
 }
 
-/* Count the possible fields in a row for each number
- * and trim availble numbers accordingly.
- * Return zero if a number cannot be filled in.
+/* Find available cells for missing numbers in sudoku segment.
+ * Update a cell's index where applicable using sophisticated elimination rules.
+ * Return 0 upon deeming the segment unsolvable, non-zero otherwise.
+ * TODO: More complex rules necessary?
  */
-static int idx_index_row_adv(struct Cell *cells, int row)
-{
-	int i, n, pos, posAvail;
-	int avail = SDK_AVAIL_DEF;
+static int idx_index_adv(struct Cell **cells, int numAvail) {
+	int i, num, pos, posAvail;
 	#ifdef VERBOSE
-		char *mod = "idx_index_row_adv";
+		char *mod = "idx_index_adv";
 	#endif
-	LOG("%s: Indexing row %d\n", mod, row);
-	for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
-		if (cells[i].num) {
-			avail &= ~(1 << cells[i].num);
-		}
-	}
-	for (n = 1; n < SDK_WIDTH + 1; n++) {
-		/* Skip if the number is already filled in. */
-		if (!(avail & (1 << n))) {
-			LOG("%s: Skipped existing number %d\n", mod, n);
+	for (num = 1; num <= SDK_WIDTH; num++) {
+		if (!(numAvail & (1 << num))) {
 			continue;
 		}
-		posAvail = 0;
-		for (i = row * SDK_WIDTH; i < (row + 1) * SDK_WIDTH; i++) {
-			if (cells[i].num) {
+		for (i = 0, posAvail = 0; i < SDK_WIDTH; i++) {
+			if (cells[i]->num) {
 				continue;
-			}
-			if (cells[i].avail & 1 << n) {
+			} else if (cells[i]->avail & (1 << num)) {
 				posAvail++;
 				pos = i;
 			}
 		}
-		switch (n) {
+		LOG("%s: Found %d available cells for number %d\n", mod, posAvail, num);
+		switch(posAvail) {
 		case 0:
-			LOG("%s: No field in row available for number %d\n", mod, row, n);
+			LOG("%s: Error: No available cell found!\n", mod);
 			return 0;
 		case 1:
-			cells[pos].avail &= 1 << n;
-			LOG("%s: Cell %d - avail: %x\n", mod, pos, n);
+			cells[pos]->avail = 1 << num;
 			break;
 		}
-	}
-	LOG("%s: Done\n", mod);
-	return 1;
-}
-
-/* Find existing numbers in a column and remove them from each cell's available numbers. */
-static void idx_index_col(struct Cell *cells, int col)
-{
-	int i;
-	int n = 0;
-	#ifdef VERBOSE
-		char *mod = "idx_index_col";
-	#endif
-	LOG("%s: Indexing column %d\n", mod, col);
-	for (i = col; i < SDK_CELLS; i += SDK_WIDTH) {
-		if (cells[i].num) {
-			n |= 1 << cells[i].num;
-			LOG("%s: Found existing number %d\n", mod, cells[i].num);
-		}
-	}
-	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
-	LOG("%s: Updating cells\n", mod);
-	for (i = col; i < SDK_CELLS; i += SDK_WIDTH) {
-		if (cells[i].num) {
-			continue;
-		}
-		cells[i].avail &= ~n;
-		LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
-	}
-	LOG("%s: Done\n", mod);
-}
-
-/* Count the possible fields in a column for each number
- * and trim availble numbers accordingly.
- * Return zero if a number cannot be filled in.
- */
-static int idx_index_col_adv(struct Cell *cells, int col)
-{
-	int i, j, pos;
-	int n = 0;
-	#ifdef VERBOSE
-		char *mod = "idx_index_col_adv";
-	#endif
-	LOG("%s: Indexing column %d\n", mod, col);
-	for (i = 1; i < SDK_WIDTH + 1; i++) {
-		for (j = col; j < SDK_CELLS; j += SDK_WIDTH) {
-			if (cells[j].num == i) {
-				goto filled;
-			} else if (cells[j].num) {
-				continue;
-			}
-			if (cells[j].avail & 1 << i) {
-				n++;
-				pos = j;
-			}
-		}
-		switch (n) {
-		case 0:
-			LOG("%s: No field in row available for number %d\n", mod, row, i);
-			return 0;
-		case 1:
-			cells[pos].avail &= 1 << i;
-			break;
-		}
-		filled:
-			continue;
-	}
-	LOG("%s: Done\n", mod);
-	return 1;
-}
-
-/* Find existing numbers in a group and remove them from each cell's available numbers. */
-static void idx_index_grp(struct Cell *cells, int row, int col)
-{
-	int i, j;
-	int n = 0;
-	#ifdef VERBOSE
-		char *mod = "idx_index_grp";
-	#endif
-	LOG("%s: Indexing group %d:%d", mod, row , col);
-	for (
-		i = row * SDK_WIDTH + col;
-		i < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
-		i += SDK_WIDTH
-	) {
-		for (j = i; j < i + sqrt(SDK_WIDTH); j++) {
-			if (cells[j].num) {
-				n |= 1 << cells[j].num;
-				LOG("%s: Found existing number %d\n", mod, cells[i].num);
-			}
-		}
-	}
-	LOG("%s: Available numbers: %x\n", mod, SDK_AVAIL_DEF ^ n);
-	LOG("%s: Updating cells\n", mod);
-	for (
-		i = row * SDK_WIDTH + col;
-		i < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
-		i += SDK_WIDTH
-	) {
-		for (j = i; j < i + sqrt(SDK_WIDTH); j++) {
-			if (cells[j].num) {
-				LOG("Skipped cell %d\n", j);
-				continue;
-			}
-			cells[j].avail &= ~n;
-			LOG("%s: Cell %d - avail: %x\n", mod, i, cells[i].avail);
-		}
-	}
-	LOG("%s: Done\n", mod);
-}
-
-/* Count the possible fields in a group for each number
- * and trim availble numbers accordingly.
- * Return zero if a number cannot be filled in.
- */
-static int idx_index_grp_adv(struct Cell *cells, int row, int col)
-{
-	int i, j, k, pos;
-	int n = 0;
-	#ifdef VERBOSE
-		char *mod = "idx_index_grp_adv";
-	#endif
-	LOG("%s: Indexing group %d:%d", mod, row , col);
-	for (i = 1; i < SDK_WIDTH + 1; i++) {
-		for (
-			j = row * SDK_WIDTH + col;
-			j < (row + sqrt(SDK_WIDTH)) * SDK_WIDTH + col;
-			j += SDK_WIDTH
-		) {
-			for (k = j; k < j + sqrt(SDK_WIDTH); k++) {
-				if (cells[k].num == i) {
-					goto filled;
-				} else if (cells[k].num) {
-					continue;
-				}
-				if (cells[k].avail & 1 << i) {
-					n++;
-					pos = k;
-				}
-			}
-		}
-		switch (n) {
-		case 0:
-			LOG("%s: No field in row available for number %d\n", mod, row, i);
-			return 0;
-		case 1:
-			cells[pos].avail &= 1 << i;
-			break;
-		}
-		filled:
-			continue;
 	}
 	LOG("%s: Done\n", mod);
 	return 1;
