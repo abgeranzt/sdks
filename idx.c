@@ -80,7 +80,7 @@ int idx_index_sdk(struct Sudoku *sdk)
 }
 
 /* Find available numbers in sudoku segment and update each cell's index.
- * Return found numbers as bitflags in an integer.
+ * Return existing numbers as bitflags in an integer.
  */
 static int idx_index(struct Cell **cells)
 {

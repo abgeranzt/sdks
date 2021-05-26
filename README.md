@@ -54,7 +54,7 @@ echo "\
 
 Building this program is relatively straight forward using your C Compiler of choice.
 
-A make file will be added in the future.
+A makefile will be added in the future.
 
 ## Copyright
 

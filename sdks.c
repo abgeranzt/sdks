@@ -37,7 +37,6 @@ static int sdkStackPos = 0;
  * Create and map arrays of pointers to provide a consistent abstracted interface
  * for rows, columns and groups.
  */
-/* TODO TESTING */
 struct Sudoku *sdks_init()
 {
 	int i, j, k, l;
@@ -165,7 +164,7 @@ static int sdks_stack_push(struct Sudoku *sdk)
 	return 1;
 }
 
-/* Restore sudoku structure from the buffer stack copy and the memory used by the latter. */
+/* Restore sudoku structure from the buffer stack copy and free the memory used by the latter. */
 static void sdks_stack_pop(struct Sudoku *sdk)
 {
 	#ifdef VERBOSE
