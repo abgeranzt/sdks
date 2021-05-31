@@ -52,9 +52,17 @@ echo "\
 
 ## Building
 
-Building this program is relatively straight forward using your C Compiler of choice.
+The makefile assumes that gcc is installed on your system.
 
-A makefile will be added in the future.
+Base functionality:
+```shell
+make
+```
+
+With verbose debugging output:
+```shell
+make debug
+```
 
 ## Copyright
 
