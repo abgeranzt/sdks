@@ -26,13 +26,11 @@
 /* TODO args */
 int main()
 {
+	int solved;
 	struct Sudoku *sdk = sdks_init();
 	io_parse(sdk);
 	idx_index_init(sdk);
-	if (!sdks_solve(sdk)) {
-		io_print(sdk);
-		return 1;
-	}
+	solved = sdks_solve(sdk);
 	io_print(sdk);
-	return 0;
+	return (solved) ? 0: 1;
 }
