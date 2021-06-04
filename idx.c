@@ -31,7 +31,7 @@ static int idx_index_adv(struct Cell **cells, int numAvail);
 /* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "idx_index_init";
 	#endif
 	int i;
@@ -51,7 +51,7 @@ void idx_index_init(struct Sudoku *sdk)
  */
 int idx_index_sdk(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "idx_index_sdk";
 	#endif
 	int i, numAvail;
@@ -84,7 +84,7 @@ int idx_index_sdk(struct Sudoku *sdk)
  */
 static int idx_index(struct Cell **cells)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "idx_index";
 	#endif
 	int i;
@@ -114,7 +114,7 @@ static int idx_index(struct Cell **cells)
  */
 static int idx_index_adv(struct Cell **cells, int numAvail)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "idx_index_adv";
 	#endif
 	int i, num, pos, posAvail;

@@ -74,7 +74,7 @@ struct Sudoku *sdks_init()
  */
 int sdks_solve(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "sdks_solve";
 	#endif
 	int i, num;
@@ -123,7 +123,7 @@ int sdks_solve(struct Sudoku *sdk)
  */
 static int sdks_fill(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "sdks_fill";
 	#endif
 	int i, num, nFilled;
@@ -150,7 +150,7 @@ static int sdks_fill(struct Sudoku *sdk)
  */
 static int sdks_stack_push(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "sdks_stack_push";
 	#endif
 	if (sdkStackPos == SDK_STACK_SIZE - 1) {
@@ -167,7 +167,7 @@ static int sdks_stack_push(struct Sudoku *sdk)
 /* Restore sudoku structure from the buffer stack copy and free the memory used by the latter. */
 static void sdks_stack_pop(struct Sudoku *sdk)
 {
-	#ifdef VERBOSE
+	#ifdef DEBUG
 		char *mod = "sdks_stack_push";
 	#endif
 	LOG("%s: Restoring sudoku from position %d of the buffer stack\n", mod, sdkStackPos);
