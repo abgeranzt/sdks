@@ -1,3 +1,4 @@
+*.o
 .local
 bin
 testing
