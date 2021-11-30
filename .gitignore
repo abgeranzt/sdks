@@ -1,4 +1,4 @@
 *.o
 .local
 bin
-testing
+*.log

@@ -6,6 +6,14 @@ clean:
 clean_h: clean
 	rm -rf bin
 
+clean_log:
+	rm -rf testing/*.log
+
+clean_all: clean_h clean_log
+
+test: clean_all all
+	./testing/test.sh
+
 debug:: CFLAGS += -D 'DEBUG'
 debug:: all
 
