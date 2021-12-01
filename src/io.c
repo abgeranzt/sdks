@@ -21,13 +21,14 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include "sdks.h"
 
 /* Parse stdin and populate sudoku structure. */
 void io_parse(struct Sudoku *sdk)
 {
-	int n, i;
+	uint16_t n, i;
 	for (i = 0; i < SDK_CELLS; i++) {
 		n = getchar() - '0';
 		sdk->cells[i].num = n;
@@ -40,8 +41,8 @@ void io_parse(struct Sudoku *sdk)
 /* Print sudoku cells in machine readable form. */
 void io_print(struct Sudoku *sdk)
 {
-	char c;
-	int i;
+	unsigned char c;
+	uint16_t i;
 	for (i = 0; i < SDK_CELLS; i++) {
 		c = ((i + 1) % 9) ? ',' : '\n';
 		printf("%d%c", sdk->cells[i].num, c);

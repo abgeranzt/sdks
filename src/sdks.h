@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdint.h>
+
 #define SDK_CELLS 81
 #define SDK_WIDTH 9
 #define SDK_GRP_WIDTH 3
@@ -35,13 +37,13 @@
  * The rightmost bit is ignored.
  */
 struct Cell {
-	int avail;
-	int num;
+	uint16_t avail;
+	uint16_t num;
 };
 
 struct Sudoku {
 	struct Cell cells[SDK_CELLS];
-	int freeCells;
+	uint16_t freeCells;
 	struct Cell *rows[SDK_WIDTH][SDK_WIDTH];
 	struct Cell *cols[SDK_WIDTH][SDK_WIDTH];
 	struct Cell *groups[SDK_WIDTH][SDK_WIDTH];
@@ -49,11 +51,11 @@ struct Sudoku {
 
 /* sdks.c */
 struct Sudoku *sdks_init();
-int sdks_solve(struct Sudoku *sdk);
+uint16_t sdks_solve(struct Sudoku *sdk);
 
 /* idx.c */
 void idx_index_init(struct Sudoku *sdk);
-int idx_index_sdk(struct Sudoku *sdk);
+uint16_t idx_index_sdk(struct Sudoku *sdk);
 
 /* io.c */
 void io_parse(struct Sudoku *sdk);

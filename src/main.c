@@ -21,12 +21,14 @@
  * This file contains the main operating procedure of the program.
  */
 
+#include <stdint.h>
+
 #include "sdks.h"
 
 /* TODO args */
 int main()
 {
-	int solved;
+	uint16_t solved;
 	struct Sudoku *sdk = sdks_init();
 	io_parse(sdk);
 	idx_index_init(sdk);

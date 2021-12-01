@@ -21,17 +21,18 @@
  * This file contains procedures to manipulate data in the sudoku structure.
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "sdks.h"
 
-static int sdks_fill(struct Sudoku *sdk);
-static int sdks_stack_push(struct Sudoku *sdk);
+static uint16_t sdks_fill(struct Sudoku *sdk);
+static uint16_t sdks_stack_push(struct Sudoku *sdk);
 static void sdks_stack_pop(struct Sudoku *sdk);
 
 static struct Sudoku *sdkStack[SDK_STACK_SIZE];
-static int sdkStackPos = 0;
+static uint16_t sdkStackPos = 0;
 
 /* Initialize Sudoku structure and return pointer to it.
  * Create and map arrays of pointers to provide a consistent abstracted interface
@@ -39,7 +40,7 @@ static int sdkStackPos = 0;
  */
 struct Sudoku *sdks_init()
 {
-	int i, j, k, l;
+	uint16_t i, j, k, l;
 	struct Sudoku *sdk = (struct Sudoku*) malloc(sizeof(struct Sudoku));
 	sdk->freeCells = 0;
 	for (i = 0, j = 0; j < SDK_WIDTH; j++) {
@@ -72,12 +73,12 @@ struct Sudoku *sdks_init()
  * Recursively try out numbers in ambigious cells.
  * Return 0 if an error is encountered, non-zero otherwise.
  */
-int sdks_solve(struct Sudoku *sdk)
+uint16_t sdks_solve(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
 		char *mod = "sdks_solve";
 	#endif
-	int i, num;
+	uint16_t i, num;
 	while (sdk->freeCells) {
 		LOG("%s: Indexing sudoku\n", mod);
 		if (!idx_index_sdk(sdk)) {
@@ -121,12 +122,13 @@ int sdks_solve(struct Sudoku *sdk)
  * Iterate through the sudoku and attempt to fill all cells.
  * Return the number of cells filled.
  */
-static int sdks_fill(struct Sudoku *sdk)
+static uint16_t sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
 		char *mod = "sdks_fill";
 	#endif
-	int i, num, nFilled;
+	uint16_t num, nFilled;
+	uint16_t i;
 	for (i = 0, nFilled = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
 			continue;
@@ -148,7 +150,7 @@ static int sdks_fill(struct Sudoku *sdk)
 /* Copy sudoku structure onto the buffer stack.
  * Return 0 if the stack is already full, non-zero otherwise.
  */
-static int sdks_stack_push(struct Sudoku *sdk)
+static uint16_t sdks_stack_push(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
 		char *mod = "sdks_stack_push";

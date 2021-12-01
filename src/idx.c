@@ -22,11 +22,12 @@
  */
 
 #include <math.h>
+#include <stdint.h>
 
 #include "sdks.h"
 
-static int idx_index(struct Cell **cells);
-static int idx_index_adv(struct Cell **cells, int numAvail);
+static uint16_t idx_index(struct Cell **cells);
+static uint16_t idx_index_adv(struct Cell **cells, uint16_t numAvail);
 
 /* Initialize the index for unfilled cells. */
 void idx_index_init(struct Sudoku *sdk)
@@ -34,7 +35,7 @@ void idx_index_init(struct Sudoku *sdk)
 	#ifdef DEBUG
 		char *mod = "idx_index_init";
 	#endif
-	int i;
+	uint16_t i;
 	LOG("%s: Initializing index\n", mod);
 	for (i = 0; i < SDK_CELLS; i++) {
 		if (sdk->cells[i].num) {
@@ -49,12 +50,12 @@ void idx_index_init(struct Sudoku *sdk)
 /* Iterate through sudoku segments and update each cell's index using elimination rules.
  * Return 0 upon detecting an unsolvable segment, non-zero otherwise.
  */
-int idx_index_sdk(struct Sudoku *sdk)
+uint16_t idx_index_sdk(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
 		char *mod = "idx_index_sdk";
 	#endif
-	int i, numAvail;
+	uint16_t i, numAvail;
 	for (i = 0; i < SDK_WIDTH; i++) {
 		LOG("%s: Indexing row %d\n", mod, i);
 		numAvail = idx_index(sdk->rows[i]);
@@ -82,12 +83,12 @@ int idx_index_sdk(struct Sudoku *sdk)
 /* Find available numbers in sudoku segment and update each cell's index.
  * Return existing numbers as bitflags in an integer.
  */
-static int idx_index(struct Cell **cells)
+static uint16_t idx_index(struct Cell **cells)
 {
 	#ifdef DEBUG
 		char *mod = "idx_index";
 	#endif
-	int i;
+	uint16_t i;
 	int numAvail = SDK_AVAIL_DEF;
 	LOG("%s: Found: ", mod);
 	for (i = 0; i < SDK_WIDTH; i++) {
@@ -112,12 +113,12 @@ static int idx_index(struct Cell **cells)
  * Return 0 upon deeming the segment unsolvable, non-zero otherwise.
  * TODO: More complex rules necessary?
  */
-static int idx_index_adv(struct Cell **cells, int numAvail)
+static uint16_t idx_index_adv(struct Cell **cells, uint16_t numAvail)
 {
 	#ifdef DEBUG
 		char *mod = "idx_index_adv";
 	#endif
-	int i, num, pos, posAvail;
+	uint16_t i, num, pos, posAvail;
 	for (num = 1; num <= SDK_WIDTH; num++) {
 		if (!(numAvail & (1 << num))) {
 			continue;
