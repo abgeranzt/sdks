@@ -33,7 +33,7 @@ static uint16_t idx_index_adv(struct Cell **cells, uint16_t numAvail);
 void idx_index_init(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
-		char *mod = "idx_index_init";
+		unsigned char *mod = "idx_index_init";
 	#endif
 	uint16_t i;
 	LOG("%s: Initializing index\n", mod);
@@ -86,7 +86,7 @@ uint16_t idx_index_sdk(struct Sudoku *sdk)
 static uint16_t idx_index(struct Cell **cells)
 {
 	#ifdef DEBUG
-		char *mod = "idx_index";
+		unsigned char *mod = "idx_index";
 	#endif
 	uint16_t i;
 	int numAvail = SDK_AVAIL_DEF;
@@ -116,7 +116,7 @@ static uint16_t idx_index(struct Cell **cells)
 static uint16_t idx_index_adv(struct Cell **cells, uint16_t numAvail)
 {
 	#ifdef DEBUG
-		char *mod = "idx_index_adv";
+		unsigned char *mod = "idx_index_adv";
 	#endif
 	uint16_t i, num, pos, posAvail;
 	for (num = 1; num <= SDK_WIDTH; num++) {

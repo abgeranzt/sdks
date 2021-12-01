@@ -76,7 +76,7 @@ struct Sudoku *sdks_init()
 uint16_t sdks_solve(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
-		char *mod = "sdks_solve";
+		unsigned char *mod = "sdks_solve";
 	#endif
 	uint16_t i, num;
 	while (sdk->freeCells) {
@@ -125,7 +125,7 @@ uint16_t sdks_solve(struct Sudoku *sdk)
 static uint16_t sdks_fill(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
-		char *mod = "sdks_fill";
+		unsigned char *mod = "sdks_fill";
 	#endif
 	uint16_t num, nFilled;
 	uint16_t i;
@@ -153,7 +153,7 @@ static uint16_t sdks_fill(struct Sudoku *sdk)
 static uint16_t sdks_stack_push(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
-		char *mod = "sdks_stack_push";
+		unsigned char *mod = "sdks_stack_push";
 	#endif
 	if (sdkStackPos == SDK_STACK_SIZE - 1) {
 		LOG("%s: Error: Stack already at maximum size of %d!\n", mod, SDK_STACK_SIZE);
@@ -170,7 +170,7 @@ static uint16_t sdks_stack_push(struct Sudoku *sdk)
 static void sdks_stack_pop(struct Sudoku *sdk)
 {
 	#ifdef DEBUG
-		char *mod = "sdks_stack_push";
+		unsigned char *mod = "sdks_stack_push";
 	#endif
 	LOG("%s: Restoring sudoku from position %d of the buffer stack\n", mod, sdkStackPos);
 	memcpy(sdk, sdkStack[--sdkStackPos], sizeof(struct Sudoku));
